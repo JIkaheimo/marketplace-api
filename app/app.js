@@ -14,7 +14,7 @@ connect(() => app.emit("ready"));
 
 app.use(express.json());
 app.use(express.static("public"));
-app.use(morgan("tiny"));
+process.env.NODE_ENV !== "test" ? app.use(morgan("tiny")) : null;
 
 app.use("/api/posts", posts);
 app.use("/api/login", login);

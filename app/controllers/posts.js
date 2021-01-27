@@ -16,8 +16,6 @@ postsRouter.post("/", async ({ body }, res, next) => {
     imageUrls: [],
   });
 
-  console.log(new Date().to);
-
   // Save post and return it.
   try {
     const savedPost = await post.save();
@@ -29,9 +27,8 @@ postsRouter.post("/", async ({ body }, res, next) => {
 
 // [GET] Display a post with the id.
 postsRouter.get("/:id", async ({ params }, res, next) => {
-  const { id } = params;
   try {
-    const post = await Post.findById(id);
+    const post = await Post.findById(params.id);
     if (post) res.json(post);
     else res.status(404).end();
   } catch (error) {
