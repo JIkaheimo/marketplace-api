@@ -10,7 +10,7 @@ const { login, users, posts } = require("./controllers");
 
 const app = express();
 
-connect();
+connect(() => app.emit("ready"));
 
 app.use(express.json());
 app.use(express.static("public"));
