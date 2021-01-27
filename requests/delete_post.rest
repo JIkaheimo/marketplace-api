@@ -1,0 +1,15 @@
+### DELETE post with invalid id format (400).
+
+DELETE http://localhost:3000/api/posts/123 HTTP/1.1
+Content-Type: application/json
+
+
+### DELETE post with nonexisting id (204).
+
+DELETE http://localhost:3000/api/posts/5099803df3f4940bd2f98392 HTTP/1.1
+Content-Type: application/json
+
+### DELETE post with existing id (204).
+
+DELETE http://localhost:3000/api/posts/5099803df3f4948bd2f98392 HTTP/1.1
+Content-Type: application/json

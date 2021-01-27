@@ -1,0 +1,15 @@
+### GET post with invalid id format (400).
+
+GET http://localhost:3000/api/posts/123 HTTP/1.1
+Content-Type: application/json
+
+
+### GET post with nonexisting id (404).
+
+GET http://localhost:3000/api/posts/5099803df3f4940bd2f98392 HTTP/1.1
+Content-Type: application/json
+
+### GET post with existing id (200).
+
+GET http://localhost:3000/api/posts/6011479b038b183c8ca3d57c HTTP/1.1
+Content-Type: application/json
