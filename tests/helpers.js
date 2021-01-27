@@ -2,6 +2,7 @@ const { Post } = require("../app/models");
 
 const initialPosts = [
   {
+    id: "60114fded0f11b3114ae61a5",
     title: "Factory New Karambit",
     category: "cars",
     description: "CS GO karambit now in real life!",
@@ -13,6 +14,7 @@ const initialPosts = [
     posted: new Date(),
   },
   {
+    id: "60114fded0f11b3be4a331a5",
     title: "Well-worn Audi A4",
     category: "cars",
     description: "Audi A4 model XXXX with 50k kilometers driven.",

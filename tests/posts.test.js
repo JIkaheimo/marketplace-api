@@ -9,8 +9,7 @@ const api = supertest(app);
 
 beforeEach("Create test posts.", async () => {
   await Post.deleteMany({});
-  await new Post(initialPosts[0]).save();
-  await new Post(initialPosts[0]).save();
+  await Post.insertMany(initialPosts);
 });
 
 /************************
@@ -107,6 +106,49 @@ describe("POST /api/posts", () => {
       const titles = postsAtEnd.map(r => r.title);
       expect(titles).to.contain(newPost.title);
     });
+  });
+});
+
+/******************************
+ ** FETCHING A SPECIFIC POST **
+ ******************************/
+describe("GET /api/posts/:id", () => {
+  it("should return a specific post", async () => {
+    const postsAtStart = await postsInDb();
+    const postToView = postsAtStart[0];
+
+    const resultPost = await api
+      .get(`/api/posts/${postToView.id}`)
+      .expect(200)
+      .expect("Content-Type", /application\/json/);
+
+    const prPostToView = JSON.parse(JSON.stringify(postToView));
+    expect(resultPost.body).to.eql(prPostToView);
+  });
+});
+
+/*********************
+ ** DELETING A POST **
+ *********************/
+describe("DELETE /api/posts/:id", () => {
+  it("should not delete a nonexisting post and return 204", async () => {
+    await api.delete(`/api/posts/60114fded0f11b3be4ae6123`).expect(204);
+    const postsAtEnd = await postsInDb();
+    expect(postsAtEnd).to.have.length(initialPosts.length);
+  });
+
+  it("should delete a specific post and return 204", async () => {
+    const postsAtStart = await postsInDb();
+    const postToDelete = postsAtStart[0];
+
+    await api.delete(`/api/posts/${postToDelete.id}`).expect(204);
+
+    const postsAtEnd = await postsInDb();
+
+    expect(postsAtEnd).to.have.length(initialPosts.length - 1);
+
+    const titles = postsAtEnd.map(post => post.title);
+    expect(titles).not.to.contain(postToDelete.title);
   });
 });
 
