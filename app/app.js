@@ -1,41 +1,26 @@
 require("dotenv").config();
 
 const express = require("express");
-const bodyParser = require("body-parser");
-const mongoose = require("mongoose");
 const morgan = require("morgan");
 
 const { connect } = require("./utils/db");
+const { errorHandler, unknownHandler } = require("./utils/middleware");
 
-const postsRouter = require("./controllers/posts");
-const loginRouter = require("./controllers/login");
-const usersRouter = require("./controllers/users");
+const { login, users, posts } = require("./controllers");
 
 const app = express();
 
 connect();
 
-app.use(bodyParser.json());
+app.use(express.json());
 app.use(express.static("public"));
 app.use(morgan("tiny"));
 
-app.use("/api/posts", postsRouter);
-app.use("/api/login", loginRouter);
-app.use("/api/users", usersRouter);
+app.use("/api/posts", posts);
+app.use("/api/login", login);
+app.use("/api/users", users);
 
-app.use((req, res) => {
-  res.status(404).send({ message: "unknown endpoint" });
-});
-
-app.use((error, req, res, next) => {
-  switch (error.name) {
-    case "CastError":
-      res.status(400).json({ message: "Malformatted id" });
-    case "ValidationError":
-      res.status(400).json({ message: error.message });
-  }
-
-  next(error);
-});
+app.use(unknownHandler);
+app.use(errorHandler);
 
 module.exports = app;
