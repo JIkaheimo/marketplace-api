@@ -9,9 +9,15 @@ postsRouter.get("/", async (req, res) => {
 
 // [POST] Create a new post.
 postsRouter.post("/", async ({ body }, res, next) => {
+  const { title, description, category, askingPrice, deliveryType } = body;
+
   // Create new post.
   const post = new Post({
-    ...body,
+    title,
+    description,
+    category,
+    askingPrice,
+    deliveryType,
     posted: new Date(),
     imageUrls: [],
   });
@@ -39,11 +45,13 @@ postsRouter.get("/:id", async ({ params }, res, next) => {
 // [PUT] Modify a post with the id.
 postsRouter.put("/:id", async ({ params, body }, res, next) => {
   const { id } = params;
-
-  const post = { ...body };
+  const { title, description, category, askingPrice, deliveryType } = body;
+  const updated = { title, description, category, askingPrice, deliveryType };
 
   try {
-    const updatedPost = await Post.findByIdAndUpdate(id, post, { new: true });
+    const updatedPost = await Post.findByIdAndUpdate(id, updated, {
+      new: true,
+    });
     res.json(updatedPost);
   } catch (error) {
     next(error);

@@ -54,6 +54,11 @@ const postSchema = mongoose.Schema({
   },
 });
 
+postSchema.pre("findOneAndUpdate", function (next) {
+  this.options.runValidators = true;
+  next();
+});
+
 postSchema.set("toJSON", {
   transform: (document, post) => {
     post.id = post._id.toString();

@@ -1,0 +1,14 @@
+PUT http://localhost:3000/api/posts/60114fded0f11b3be4ae61a5 HTTP/1.1
+Content-Type: application/json
+
+{
+  "title": "Factory New Audi A4",
+  "category": "cars",
+  "askingPrice": 3.99,
+  "description": "asdasdasd",
+  "deliveryType": {
+    "pickup": false,
+    "shipping": true
+  }
+}
+
