@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const { addressSchema } = require("./user");
 
 const deliverySchema = mongoose.Schema(
   {
@@ -11,6 +12,24 @@ const deliverySchema = mongoose.Schema(
       type: Boolean,
       required: true,
       cast: false,
+    },
+  },
+  { _id: false }
+);
+
+const sellerSchema = mongoose.Schema(
+  {
+    phoneNumber: {
+      type: String,
+      required: true,
+    },
+    email: {
+      type: String,
+      required: true,
+    },
+    username: {
+      type: String,
+      required: true,
     },
   },
   { _id: false }
@@ -51,6 +70,14 @@ const postSchema = mongoose.Schema({
     required: true,
     immutable: true,
     cast: false,
+  },
+  location: {
+    type: addressSchema,
+    required: true,
+  },
+  seller: {
+    type: sellerSchema,
+    required: true,
   },
 });
 

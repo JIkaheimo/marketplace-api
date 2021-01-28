@@ -2,5 +2,15 @@ POST http://localhost:3000/api/users HTTP/1.1
 Content-Type: application/json
 
 {
-  "username": "Testaaja123"
+  "email": "testaaja123@test.com",
+  "username": "Testaaja123",
+  "address": {
+    "city": "Oulu",
+    "country": "Finland",
+    "postalCode": 90550,
+    "street": "Testaajantie 123"
+  },
+  "phoneNumber": "+358401231231",
+  "birthDate": "1994-08-05",
+  "password": "testaaja"
 }

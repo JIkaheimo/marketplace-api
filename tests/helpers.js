@@ -1,4 +1,4 @@
-const { Post } = require("../app/models");
+const { Post, User } = require("../app/models");
 
 const initialPosts = [
   {
@@ -27,7 +27,7 @@ const initialPosts = [
   },
 ];
 
-const nonexistingId = async () => {
+const fakeId = async () => {
   const tempPost = new Post({ ...initialPosts[0], title: "Temporary post" });
   await tempPost.save();
   await tempPost.remove();
@@ -36,11 +36,17 @@ const nonexistingId = async () => {
 
 const postsInDb = async () => {
   const posts = await Post.find({});
-  return posts;
+  return posts.map(p => p.toJSON());
+};
+
+const usersInDb = async () => {
+  const users = await User.find({});
+  return users.map(u => u.toJSON());
 };
 
 module.exports = {
   initialPosts,
-  nonexistingId,
+  fakeId,
   postsInDb,
+  usersInDb,
 };
