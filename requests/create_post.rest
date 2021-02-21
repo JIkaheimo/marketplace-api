@@ -6,9 +6,24 @@ Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlRlc
   "title": "Factory New Audi A4",
   "category": "cars",
   "description": "ads",
-  "askingPrice": 3.99,
   "deliveryType": {
     "pickup": true,
-    "shipping": true
-  }
+  },
+  "askingPrice": 3.99
+}
+
+
+### UNAUTHORIZED
+
+POST http://localhost:3000/api/posts HTTP/1.1
+Content-Type: application/json
+
+{
+  "title": "Factory New Audi A4",
+  "category": "cars",
+  "description": "ads",
+  "deliveryType": {
+    "pickup": true,
+  },
+  "askingPrice": 3.99
 }

@@ -1,8 +1,4 @@
-const { User, userSchema, addressSchema } = require("./user");
+//@ts-check
 
-module.exports = {
-  Post: require("./post"),
-  User,
-  userSchema,
-  addressSchema,
-};
+export * from './user.js';
+export * from './post.js';

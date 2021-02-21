@@ -1,0 +1,62 @@
+
+<h2>PostProperties</h2>
+<ul class="parameter">
+  <li class="param-required-false">id : String
+    <br/>Identification number of the posting
+  </li>
+</ul>
+<ul class="parameter">
+  <li class="param-required-true">description : String
+    <br/>Description of the posting
+  </li>
+</ul>
+<ul class="parameter">
+  <li class="param-required-true">title : String
+    <br/>Short title of the post.
+  </li>
+</ul>
+<ul class="parameter">
+  <li class="param-required-true">category : String
+    <br/>Category of the item being sold
+      <dl class="param-enum">
+        <dt>Enum:
+            <dd>computers</dd>
+            <dd>electronics</dd>
+            <dd>cars</dd>
+            <dd>pets</dd>
+            <dd>food</dd>
+            <dd>drinks</dd>
+        </dt>
+      </dl>
+  </li>
+</ul>
+<ul class="parameter">
+  <li class="param-required-true">askingPrice : BigDecimal
+    <br/>Price of the product
+  </li>
+</ul>
+<ul class="parameter">
+  <li class="param-required-false">posted : Date
+    <br/>Server generated datestamp when the post was created.
+  </li>
+</ul>
+<ul class="parameter">
+  <li class="param-required-true">deliveryType : PostProperties_deliveryType
+    <br/>
+  </li>
+</ul>
+<ul class="parameter">
+  <li class="param-required-false">seller : SellerProperties
+    <br/>
+  </li>
+</ul>
+<ul class="parameter">
+  <li class="param-required-false">location : LocationProperties
+    <br/>
+  </li>
+</ul>
+<ul class="parameter">
+  <li class="param-required-false">imageUrls : List
+    <br/>Images of the product being sold.
+  </li>
+</ul>

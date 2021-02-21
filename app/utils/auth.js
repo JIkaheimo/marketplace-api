@@ -1,23 +1,83 @@
-const jwt = require("jsonwebtoken");
+//@ts-check
 
-const getToken = req => {
-  const authHeader = req.get("authorization");
+/**
+ * This module contains some authentication/authorization
+ * related helper functions and middleware.
+ * @module utils/auth
+ */
+
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+
+import { errors, config } from './index.js';
+
+/**
+ * Returns a JSON webtoken from the given request.
+ *
+ * @middleware
+ * @param {import('express').Request} req The request.
+ * @returns {string} JSON web token.
+ */
+export const getToken = req => {
+  // Get the authorization header field.
+  const authHeader = req.get('Authorization');
+
   const token =
+    // Make sure auth header exists.
     authHeader &&
-    authHeader.toLowerCase().startsWith("bearer") &&
+    // Check for bearer auth type.
+    authHeader.toLowerCase().startsWith('bearer') &&
+    // Get the token (string after bearer)
     authHeader.substring(7);
 
   return token;
 };
 
-const checkToken = async (req, res, next) => {
+/**
+ * Middleware to check if there is a bearer token in request.
+ *
+ * @middleware
+ * @param {import('express').Request} req The request.
+ * @param {import('express').Response} _ The response.
+ * @param {import('express').NextFunction} next
+ */
+export const checkToken = async (req, _, next) => {
   const token = getToken(req);
+  // Verify token.
   const decodedToken = jwt.verify(token, process.env.SECRET);
-  req.userId = decodedToken.id;
+  const { username, id } = decodedToken;
+
+  // Add parsed token data to request.
+  req['username'] = username;
+  req['userId'] = id;
+  // Call next middleware.
   next();
 };
 
-module.exports = {
+/**
+ * Middleware to make sure the client is authenticated.
+ */
+export const authenticate = checkToken;
+
+/**
+ * Middleware to hash the user password from the given request.
+ * @param {import('express').Request} req The request.
+ * @param {import('express').Response} _ The response.
+ * @param {import('express').NextFunction} next
+ */
+export const hash = async (req, _, next) => {
+  const { password } = req.body;
+  // Make sure password is present.
+  if (!password) next(errors.badRequestError());
+  // Hash the password.
+  req['passwordHash'] = await bcrypt.hash(password, config.SALT_ROUNDS);
+  // Call next middleware.
+  next();
+};
+
+export default {
+  authenticate: checkToken,
   getToken,
   checkToken,
+  hash,
 };

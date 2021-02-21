@@ -1,7 +1,8 @@
-const mongoose = require("mongoose");
-const { addressSchema } = require("./user");
+import mongoose from 'mongoose';
 
-const deliverySchema = mongoose.Schema(
+import { addressSchema } from './index.js';
+
+export const deliverySchema = mongoose.Schema(
   {
     shipping: {
       type: Boolean,
@@ -17,7 +18,7 @@ const deliverySchema = mongoose.Schema(
   { _id: false }
 );
 
-const sellerSchema = mongoose.Schema(
+export const sellerSchema = mongoose.Schema(
   {
     phoneNumber: {
       type: String,
@@ -35,7 +36,7 @@ const sellerSchema = mongoose.Schema(
   { _id: false }
 );
 
-const postSchema = mongoose.Schema({
+export const postSchema = mongoose.Schema({
   description: {
     type: String,
     required: true,
@@ -50,7 +51,7 @@ const postSchema = mongoose.Schema({
   },
   category: {
     type: String,
-    enum: ["computers", "electronics", "cars", "pets", "food", "drinks"],
+    enum: ['computers', 'electronics', 'cars', 'pets', 'food', 'drinks'],
     required: true,
     cast: false,
   },
@@ -64,6 +65,15 @@ const postSchema = mongoose.Schema({
   deliveryType: {
     type: deliverySchema,
     required: true,
+    cast: false,
+  },
+  imageUrls: {
+    type: [
+      {
+        type: String,
+      },
+    ],
+    validate: value => value.length <= 4,
   },
   posted: {
     type: Date,
@@ -81,12 +91,12 @@ const postSchema = mongoose.Schema({
   },
 });
 
-postSchema.pre("findOneAndUpdate", function (next) {
+postSchema.pre('findOneAndUpdate', function (next) {
   this.options.runValidators = true;
   next();
 });
 
-postSchema.set("toJSON", {
+postSchema.set('toJSON', {
   transform: (document, post) => {
     post.id = post._id.toString();
     delete post._id;
@@ -94,4 +104,6 @@ postSchema.set("toJSON", {
   },
 });
 
-module.exports = mongoose.model("Post", postSchema);
+export const Post = mongoose.model('Post', postSchema);
+
+export default { Post, deliverySchema, postSchema, sellerSchema };

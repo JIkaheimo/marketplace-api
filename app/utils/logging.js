@@ -1,6 +1,14 @@
-const i = (...params) =>
-  process.env.NODE_ENV !== "test" ? console.log(...params) : null;
+/**
+ * This module contains some logging specific
+ * helper functions and middleware.
+ */
 
-const e = (...params) => console.log(...params);
+export const i = (...params) =>
+  process.env.NODE_ENV !== 'test' ? console.log(...params) : null;
 
-module.exports = { i, e };
+export const e = (...params) => console.log(...params);
+
+export default {
+  i,
+  e,
+};

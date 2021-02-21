@@ -1,5 +1,6 @@
-PUT http://localhost:3000/api/posts/60114fded0f11b3be4ae61a5 HTTP/1.1
+PUT http://localhost:3000/api/posts/601bbdac90a0dd3538d6ac49 HTTP/1.1
 Content-Type: application/json
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlRlc3RhYWphMzQ1IiwiaWQiOiI2MDMwMTUzYjI0MjIyNjM1NjhlZWJlZjYiLCJpYXQiOjE2MTM3NjM5MTR9.Z1vBx763s23IxDPP7DpRo1KyYkZndOzLcqazDWqdymE
 
 {
   "title": "Factory New Audi A4",

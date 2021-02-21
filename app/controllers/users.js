@@ -1,32 +1,29 @@
-const bcrypt = require("bcrypt");
-const usersRouter = require("express").Router();
-const { User } = require("../models");
+import bcrypt from 'bcrypt';
+import { Router } from 'express';
+import { User } from '../models/index.js';
+import { hash } from '../utils/auth.js';
+import { validateUser } from '../utils/middleware.js';
 
-const SALT_ROUNDS = 10;
-
-const getRequiredFields = ({
-  email,
-  username,
-  address,
-  phoneNumber,
-  birthDate,
-}) => ({ email, username, address, phoneNumber, birthDate });
+const usersRouter = Router();
 
 // Create a new user
-usersRouter.post("/", async ({ body }, res, next) => {
-  const { password } = body;
-  if (!password) res.status(400).json({ message: "Malformatted data." });
-  const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+usersRouter.post(
+  '/',
+  [validateUser, hash],
+  async ({ parsed, passwordHash }, res, next) => {
+    // Make sure not to store the password.
+    const { password, ...userInfo } = parsed;
+    // Create a new User model.
+    const user = new User({
+      ...userInfo,
+      passwordHash,
+      creationDate: new Date().toISOString().split('T')[0],
+    });
+    // Save the user.
+    const savedUser = await user.save();
+    // Return the newly created user and token.
+    res.json({ user: savedUser, token: savedUser.token });
+  }
+);
 
-  const user = new User({
-    creationDate: new Date().toISOString().split("T")[0],
-    passwordHash,
-    ...getRequiredFields(body),
-  });
-
-  const savedUser = await user.save();
-
-  res.json(savedUser);
-});
-
-module.exports = usersRouter;
+export default usersRouter;

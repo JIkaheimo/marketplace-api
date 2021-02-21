@@ -1,24 +1,25 @@
-const mongoose = require("mongoose");
+//@ts-check
 
-const log = require("./logging");
-const { DB_URI } = require("./config");
+import mongoose from 'mongoose';
 
-connect = callback => {
-  log.i("Connecting to MongoDB...");
+import { logger, config } from './index.js';
+
+export const connect = callback => {
+  logger.i('Connecting to MongoDB...');
   mongoose
-    .connect(DB_URI, {
+    .connect(config.DB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       useFindAndModify: false,
       useCreateIndex: true,
     })
     .then(() => {
-      log.i("Connected to MongoDB!");
+      logger.i('Connected to MongoDB!');
       callback();
     })
-    .catch(err => log.e("Could not connect to MongoDB..."));
+    .catch(err => logger.e('Could not connect to MongoDB...'));
 };
 
-module.exports = {
+export default {
   connect,
 };

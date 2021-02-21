@@ -1,7 +1,8 @@
-const mongoose = require("mongoose");
-const uniqueValidator = require("mongoose-unique-validator");
+import jwt from 'jsonwebtoken';
+import mongoose from 'mongoose';
+import uniqueValidator from 'mongoose-unique-validator';
 
-const addressSchema = mongoose.Schema(
+export const addressSchema = mongoose.Schema(
   {
     city: {
       type: String,
@@ -12,7 +13,7 @@ const addressSchema = mongoose.Schema(
       required: true,
     },
     postalCode: {
-      type: Number,
+      type: String,
       required: true,
     },
     street: {
@@ -23,7 +24,7 @@ const addressSchema = mongoose.Schema(
   { _id: false }
 );
 
-const userSchema = mongoose.Schema({
+export const userSchema = mongoose.Schema({
   email: {
     type: String,
     required: true,
@@ -32,7 +33,7 @@ const userSchema = mongoose.Schema({
   username: {
     type: String,
     required: true,
-    unique: [true, "User with that username aready exists!"],
+    unique: [true, 'User with that username aready exists!'],
   },
   passwordHash: {
     type: String,
@@ -56,24 +57,36 @@ const userSchema = mongoose.Schema({
   },
 });
 
-userSchema.plugin(uniqueValidator, { message: "{PATH} already exists!" });
+userSchema.virtual('token').get(function () {
+  const userForToken = {
+    username: this.username,
+    id: this._id,
+  };
 
-userSchema.pre("findOneAndUpdate", function (next) {
+  return jwt.sign(userForToken, process.env.SECRET);
+});
+
+userSchema.plugin(uniqueValidator, { message: '{PATH} already exists!' });
+
+userSchema.pre('findOneAndUpdate', function (next) {
   this.options.runValidators = true;
   next();
 });
 
-userSchema.set("toJSON", {
+userSchema.set('toJSON', {
   transform: (document, user) => {
     user.id = user._id.toString();
     delete user._id;
     delete user.__v;
     delete user.passwordHash;
+    delete user.token;
   },
 });
 
-module.exports = {
-  User: mongoose.model("User", userSchema),
+export const User = mongoose.model('User', userSchema);
+
+export default {
+  User,
   userSchema,
   addressSchema,
 };
