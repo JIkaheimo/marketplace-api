@@ -1,5 +1,6 @@
 //@ts-check
 
+// Third-party modules.
 import mongoose from 'mongoose';
 import faker from 'faker';
 import path from 'path';
@@ -8,6 +9,7 @@ import { default as chai } from 'chai';
 const { expect } = chai;
 import fs from 'fs/promises';
 
+// In-house modules.
 import app from '../server.js';
 import { getLocation, getSeller, Post, User } from '../models/index.js';
 
@@ -23,9 +25,19 @@ import {
 } from './helpers.js';
 
 import { ERRORS } from '../constants.js';
-import { IMAGES_PATH } from '../utils/config.js';
 
 const { unauthorized, notFound, badRequest } = ERRORS;
+
+/**
+ * Simple higher-order function to allow easier
+ * comparison of posts in the beginning and the end.
+ */
+const comparePosts = (postsAtStart, callback) => {
+  return async () => {
+    const postsAtEnd = await postsInDb();
+    callback(postsAtStart, postsAtEnd);
+  };
+};
 
 const api = supertest(app);
 
@@ -33,20 +45,20 @@ describe('when there are some posts in the database', () => {
   let token = null;
   let seller = null;
   let location = null;
-  //
+
+  // Fill database with user.
   beforeEach('Create test user.', async () => {
-    // Add user to database.
     await createUsers([initialUser]);
   });
-  //
+
+  // Fill test database with some posts.
   beforeEach('Create test posts.', async () => {
-    // Add posts to database.
     await Post.deleteMany({});
     await Post.insertMany(initialPosts);
   });
-  //
+
+  // Get valid breare token.
   beforeEach('Get valid bearer token.', async () => {
-    // Get the token for initial user.
     token = await getToken(initialUser.username);
   });
   //
@@ -58,24 +70,29 @@ describe('when there are some posts in the database', () => {
   /************************
    ** FETCHING ALL POSTS **
    ************************/
-  describe('GET /api/posts', () => {
+  describe('[GET /api/posts] fetching all posts', () => {
+    // Helper functions.
+    const getPosts = () => api.get('/api/posts');
     //
     it('should return posts as JSON', async () => {
-      await api
-        .get('/api/posts')
+      await getPosts()
         .expect(200)
         .expect('Content-Type', /application\/json/);
     });
 
     it('should return all posts', async () => {
-      const res = await api.get('/api/posts');
+      const res = await getPosts();
       expect(res.body).to.have.length(initialPosts.length);
     });
 
     it('should contain specific post', async () => {
-      const res = await api.get('/api/posts');
+      const res = await getPosts();
       const titles = res.body.map(r => r.title);
       expect(titles).to.contain(initialPosts[0].title);
+    });
+
+    it('should work for authenticated user', async () => {
+      await withToken(getPosts(), token).expect(200);
     });
   });
 
@@ -136,8 +153,12 @@ describe('when there are some posts in the database', () => {
     });
 
     describe('with valid data', () => {
-      it('should not create a new post without authentication', async () => {
-        const newPost = getNewPost();
+      it('should require authentication', async () => {
+        await api
+          .post('/api/posts')
+          .send({ ...getNewPost() })
+          .expect(unauthorized.code)
+          .expect({ message: unauthorized.message });
       });
 
       it('should create a new post', async () => {
@@ -163,14 +184,15 @@ describe('when there are some posts in the database', () => {
    ** FETCHING A SPECIFIC POST **
    ******************************/
   describe('GET /api/posts/:id', () => {
-    //
+    const getPost = id => api.get(`/api/posts/${id}`);
+
     describe('with valid id', () => {
+      // Post with valid id.
       it('should return a post with the id', async () => {
         const postsAtStart = await postsInDb();
-        const postToView = postsAtStart[0];
+        const postToView = faker.random.arrayElement(postsAtStart);
 
-        const resultPost = await api
-          .get(`/api/posts/${postToView.id}`)
+        const resultPost = await getPost(postToView.id)
           .expect(200)
           .expect('Content-Type', /application\/json/);
 
@@ -181,8 +203,9 @@ describe('when there are some posts in the database', () => {
 
     describe('with non-existing id', () => {
       it('should return status code 404 (Not Found)', async () => {
-        const fakedId = await fakeId();
-        await api.get(`/api/posts/${fakedId}`).expect(404);
+        await getPost(fakeId())
+          .expect(notFound.code)
+          .expect({ message: notFound.message });
       });
     });
 
@@ -197,38 +220,252 @@ describe('when there are some posts in the database', () => {
   });
 
   /*********************
-   ** DELETING A POST **
+   ** MDIFYING A POST **
    *********************/
-  describe('DELETE /api/posts/:id', () => {
-    it('should not delete a nonexisting post', async () => {
-      const postsInStart = await postsInDb();
-      await api
-        .delete('/api/posts/i-got-no-meaning')
-        .send()
-        .expect(notFound.code)
-        .expect({ message: notFound.message });
-      const postsInEnd = await postsInDb();
-      expect(postsInStart).to.eql(postsInEnd);
+  describe('[PUT /api/posts/:id] Modifying a post', () => {
+    let postsAtStart = null;
+    const modifyPost = postId => api.put(`/api/posts/${postId}`);
+    const modifyPostAuth = postId => withToken(modifyPost(postId), token);
+
+    beforeEach('fetch initial posts', async () => {
+      postsAtStart = await postsInDb();
     });
 
-    //
+    // Invalid indentifier.
+    describe('with invalid identifier', () => {
+      // Without authentication.
+      describe('without authentication', () => {
+        // Non-existing id.
+        it('should return not found for non-existing id', async () => {
+          await modifyPostAuth(fakeId())
+            .expect(notFound.code)
+            .expect({ message: notFound.message });
 
-    it('should delete a post with the id and return status code 204 (No Content)', async () => {
-      // Get the posts in the beginning.
-      const postsAtStart = await postsInDb();
-      // Select random post to delete.
-      const postToDelete = faker.random.arrayElement(postsAtStart);
-      // Delete the post.
-      await withToken(api.delete(`/api/posts/${postToDelete.id}`), token)
-        .send()
-        .expect(204);
-      // Get the posts after deletion.
-      const postsAtEnd = await postsInDb();
-      // There should be 1 post less.
-      expect(postsAtEnd).to.have.length(initialPosts.length - 1);
-      // Check if the post has been deleted.
-      const ids = postsAtEnd.map(post => post.id);
-      expect(ids).not.to.contain(postToDelete.id);
+          // Make sure no post was deleted.
+          const postsAtEnd = await postsInDb();
+          expect(postsAtStart).to.have.length(postsAtEnd.length);
+        });
+
+        // Invalid id.
+        it('should return not found for invalid id', async () => {
+          await modifyPost('invalid-id')
+            .expect(notFound.code)
+            .expect({ message: notFound.message });
+
+          // Make sure no post was deleted.
+          const postsAtEnd = await postsInDb();
+          expect(postsAtStart).to.have.length(postsAtEnd.length);
+        });
+      });
+
+      // With authentication.
+      describe('with authentication', () => {
+        // Non-existing id.
+        it('should return not found for non-existing id', async () => {
+          await modifyPost(fakeId())
+            .expect(notFound.code)
+            .expect({ message: notFound.message });
+
+          // Make sure no post was deleted.
+          const postsAtEnd = await postsInDb();
+          expect(postsAtStart).to.have.length(postsAtEnd.length);
+        });
+        // Invalid id.
+        it('should return not found for invalid id', async () => {
+          await modifyPost('invalid-id')
+            .expect(notFound.code)
+            .expect({ message: notFound.message });
+
+          // Make sure no post was deleted.
+          const postsAtEnd = await postsInDb();
+          expect(postsAtStart).to.have.length(postsAtEnd.length);
+        });
+      });
+    });
+
+    // Valid identifier.
+    describe('with valid identifier', () => {
+      let postToDelete = null;
+
+      // Get a valid post id.
+      beforeEach('randomize post to delete', async () => {
+        const posts = await postsInDb();
+        postToDelete = faker.random.arrayElement(posts);
+      });
+
+      // Without authentication.
+      describe('without authentication', () => {
+        // Valid body.
+        it('should return unauthorized for valid body', async () => {
+          await modifyPost(postToDelete.id)
+            .expect(unauthorized.code)
+            .expect({ message: unauthorized.message });
+
+          // Make sure no post was deleted.
+          const postsAtEnd = await postsInDb();
+          expect(postsAtStart).to.have.length(postsAtEnd.length);
+        });
+
+        // Invalid body.
+        it('should return unauthorized for invalid body', async () => {
+          await modifyPost(postToDelete.id)
+            .send({ invalid: 'invalid' })
+            .expect(unauthorized.code)
+            .expect({ message: unauthorized.message });
+
+          // Make sure no post was deleted.
+          const postsAtEnd = await postsInDb();
+          expect(postsAtStart).to.have.length(postsAtEnd.length);
+        });
+      });
+
+      // With authentication.
+      describe('with authentication', () => {
+        // Valid body.
+        it('should return no content and delete a post for valid body', async () => {
+          await modifyPostAuth(postToDelete.id).expect(204);
+          // Make sure post was deleted.
+          const postsAtEnd = await postsInDb();
+          expect(postsAtEnd).to.have.length(postsAtStart.length - 1);
+          expect(postsAtEnd.map(p => p.id)).to.not.contain(postToDelete.id);
+        });
+
+        // Invalid body.
+        it('should return bad request for invalid body.', async () => {
+          await modifyPostAuth(postToDelete.id)
+            .send({ invalid: 'invalid' })
+            .expect(badRequest.code)
+            .expect({ message: badRequest.message });
+          // Make sure no post was deleted.
+          const postsAtEnd = await postsInDb();
+          expect(postsAtEnd).to.have.length(postsAtStart.length);
+        });
+      });
+    });
+  });
+
+  /*********************
+   ** DELETING A POST **
+   *********************/
+  describe.skip('[DELETE /api/posts/:id] Deleting a post', () => {
+    let postsAtStart = null;
+    const deletePost = postId => api.delete(`/api/posts/${postId}`);
+    const deletePostAuth = postId => withToken(deletePost(postId), token);
+
+    beforeEach('fetch initial posts', async () => {
+      postsAtStart = await postsInDb();
+    });
+
+    // Invalid indentifier.
+    describe('with invalid identifier', () => {
+      // Without authentication.
+      describe('without authentication', () => {
+        // Non-existing id.
+        it('should return not found for non-existing id', async () => {
+          await deletePostAuth(fakeId())
+            .expect(notFound.code)
+            .expect({ message: notFound.message });
+
+          // Make sure no post was deleted.
+          const postsAtEnd = await postsInDb();
+          expect(postsAtStart).to.have.length(postsAtEnd.length);
+        });
+
+        // Invalid id.
+        it('should return not found for invalid id', async () => {
+          await deletePost('invalid-id')
+            .expect(notFound.code)
+            .expect({ message: notFound.message });
+
+          // Make sure no post was deleted.
+          const postsAtEnd = await postsInDb();
+          expect(postsAtStart).to.have.length(postsAtEnd.length);
+        });
+      });
+
+      // With authentication.
+      describe('with authentication', () => {
+        // Non-existing id.
+        it('should return not found for non-existing id', async () => {
+          await deletePost(fakeId())
+            .expect(notFound.code)
+            .expect({ message: notFound.message });
+
+          // Make sure no post was deleted.
+          const postsAtEnd = await postsInDb();
+          expect(postsAtStart).to.have.length(postsAtEnd.length);
+        });
+        // Invalid id.
+        it('should return not found for invalid id', async () => {
+          await deletePost('invalid-id')
+            .expect(notFound.code)
+            .expect({ message: notFound.message });
+
+          // Make sure no post was deleted.
+          const postsAtEnd = await postsInDb();
+          expect(postsAtStart).to.have.length(postsAtEnd.length);
+        });
+      });
+    });
+
+    // Valid identifier.
+    describe('with valid identifier', () => {
+      let postToDelete = null;
+
+      // Get a valid post id.
+      beforeEach('randomize post to delete', async () => {
+        const posts = await postsInDb();
+        postToDelete = faker.random.arrayElement(posts);
+      });
+
+      // Without authentication.
+      describe('without authentication', () => {
+        // Valid body.
+        it('should return unauthorized for valid body', async () => {
+          await deletePost(postToDelete.id)
+            .expect(unauthorized.code)
+            .expect({ message: unauthorized.message });
+
+          // Make sure no post was deleted.
+          const postsAtEnd = await postsInDb();
+          expect(postsAtStart).to.have.length(postsAtEnd.length);
+        });
+
+        // Invalid body.
+        it('should return unauthorized for invalid body', async () => {
+          await deletePost(postToDelete.id)
+            .send({ invalid: 'invalid' })
+            .expect(unauthorized.code)
+            .expect({ message: unauthorized.message });
+
+          // Make sure no post was deleted.
+          const postsAtEnd = await postsInDb();
+          expect(postsAtStart).to.have.length(postsAtEnd.length);
+        });
+      });
+
+      // With authentication.
+      describe('with authentication', () => {
+        // Valid body.
+        it('should return no content and delete a post for valid body', async () => {
+          await deletePostAuth(postToDelete.id).expect(204);
+          // Make sure post was deleted.
+          const postsAtEnd = await postsInDb();
+          expect(postsAtEnd).to.have.length(postsAtStart.length - 1);
+          expect(postsAtEnd.map(p => p.id)).to.not.contain(postToDelete.id);
+        });
+
+        // Invalid body.
+        it('should return bad request for invalid body.', async () => {
+          await deletePostAuth(postToDelete.id)
+            .send({ invalid: 'invalid' })
+            .expect(badRequest.code)
+            .expect({ message: badRequest.message });
+          // Make sure no post was deleted.
+          const postsAtEnd = await postsInDb();
+          expect(postsAtEnd).to.have.length(postsAtStart.length);
+        });
+      });
     });
   });
 
@@ -238,42 +475,54 @@ describe('when there are some posts in the database', () => {
   describe('POST /api/posts/:id/upload', () => {
     let post = null;
     let upload = null;
+    let uploadWithToken = null;
     //
     beforeEach('Randomize post', async () => {
       const posts = await postsInDb();
       post = faker.random.arrayElement(posts);
-      upload = () => withToken(api.post(`/api/posts/${post.id}/upload`), token);
+      upload = (id = post.id) => api.post(`/api/posts/${id}/upload`);
+      uploadWithToken = (id = post.id) => withToken(upload(id), token);
     });
     //
     afterEach('Remove image folder', async () => {
       //await fs.rm(IMAGES_PATH, { recursive: true, force: true });
     });
 
+    // Nonexisting post.
+    it('should not upload for post with invalid id', async () => {
+      await uploadWithToken(fakeId())
+        .send()
+        .expect(notFound.code)
+        .expect({ message: notFound.message });
+    });
+
     // Removing images.
     it('should remove the images when none is provided', async () => {
-      await upload().send().expect(200).expect([]);
+      await uploadWithToken().send().expect(200).expect([]);
     });
 
     // Uploading one image.
     it('should upload attached image', async () => {
-      await upload().attach('fileName', './app/tests/1.png').expect(200);
+      await uploadWithToken()
+        .attach('fileName', './app/tests/1.png')
+        .expect(200);
     });
 
     // Uploading multiple images.
     it('should upload attached images', async () => {
-      const res = await upload()
+      const res = await uploadWithToken()
         .attach('fileName', './app/tests/1.png')
         .attach('fileName', './app/tests/1.png')
-        .attach('fileName', './app/tests/1.png')
+        .attach('fileName', './app/tests/index.jpg')
         .attach('fileName', './app/tests/1.png')
         .expect(200);
       expect(res.body).to.have.lengthOf(4);
-      expect(res.body[0]).to.be('string');
+      expect(res.body[0]).to.be.a('string');
     });
 
     // Uploading more than max num of images.
-    it('should return a correct response code for invalid amount of images', async () => {
-      await upload()
+    it('should return a correct response type for invalid amount of images', async () => {
+      await uploadWithToken()
         .attach('fileName', './app/tests/1.png')
         .attach('fileName', './app/tests/1.png')
         .attach('fileName', './app/tests/1.png')
@@ -282,7 +531,25 @@ describe('when there are some posts in the database', () => {
         .expect(badRequest.code)
         .expect({ message: badRequest.message });
     });
-    //
+
+    // Uploading files of
+    it('should return a correct response type for invalid file type', async () => {
+      await uploadWithToken()
+        .attach('fileName', './app/tests/empty.txt')
+        .expect(badRequest.code)
+        .expect({ message: badRequest.message });
+    });
+
+    /*
+    // Unauthenticated user.
+    it('should require authentication', async () => {
+      await api
+        .post(`/api/posts/${post.id}/upload`)
+        .attach('fileName', './app/tests/1.png')
+        .expect(unauthorized.code)
+        .expect({ message: unauthorized.message });
+    });
+    */
   });
 });
 

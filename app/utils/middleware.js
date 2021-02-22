@@ -58,9 +58,9 @@ export const pathProvider = (req, res, next) => {
  * Error handler.
  */
 export const errorHandler = (error, req, res, next) => {
-  console.log(error.name);
-  console.log(error.message);
-  console.log(error.stacktrace);
+  //console.log(error.name);
+  //console.log(error.message);
+  //console.log(error.stacktrace);
 
   // Add any error specific handler code here.
   switch (error.name) {

@@ -3,7 +3,7 @@ import mongoose from 'mongoose';
 import uniqueValidator from 'mongoose-unique-validator';
 
 /**
- * Address Mongoose schema.
+ * Schema of address.
  */
 export const addressSchema = mongoose.Schema(
   {
@@ -28,7 +28,7 @@ export const addressSchema = mongoose.Schema(
 );
 
 /**
- * User Mongoose schema.
+ * Schema of user.
  */
 export const userSchema = mongoose.Schema(
   {
@@ -106,6 +106,8 @@ userSchema.pre('findOneAndUpdate', function (next) {
 userSchema.set('toJSON', {
   transform: (document, user) => {
     user.id = user._id.toString();
+    user.creationDate = user.creationDate.toString();
+    user.birthDate = user.birthDate.toString();
     delete user._id;
     delete user.__v;
     delete user.passwordHash;

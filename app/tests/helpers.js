@@ -5,6 +5,7 @@
  * used for testing.
  */
 
+import mongoose from 'mongoose';
 import faker from 'faker';
 
 import { Post, User } from '../models/index.js';
@@ -50,12 +51,7 @@ export const getToken = async username => {
 export const withToken = (req, token) =>
   req.set('Authorization', `bearer ${token}`);
 
-export const fakeId = async () => {
-  const tempPost = new Post({ ...initialPosts[0], title: 'Temporary post' });
-  await tempPost.save();
-  await tempPost.remove();
-  return tempPost._id.toString();
-};
+export const fakeId = () => mongoose.Types.ObjectId();
 
 export const postsInDb = async () => {
   const posts = await Post.find({});

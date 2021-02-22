@@ -1,20 +1,20 @@
+//@ts-check
+
 import mongoose from 'mongoose';
 import supertest from 'supertest';
-
 import { default as chai } from 'chai';
 const { expect } = chai;
 
 import app from '../server.js';
-import { User } from '../models/index.js';
 import { usersInDb, initialUsers, getNewUser, createUsers } from './helpers.js';
 import { ERRORS } from '../constants.js';
 import { login, removeField } from './data.js';
-
+import { User } from '../models/user.js';
 const { badRequest, unauthorized } = ERRORS;
 
 const api = supertest(app);
 
-const loginReq = (body, { message, code }) => {
+const loginReq = (body, { message = null, code }) => {
   const req = api.post('/api/login').send(body).expect(code);
   if (message) req.expect({ message });
   return req;
@@ -107,22 +107,28 @@ describe('when there is one user in the database', () => {
     console.log(user);
     let userCredentials = { username: user.username, password: user.password };
 
-    // [400] Invalid request body.
+    // Invalid request body.
     it('should return 400 for invalid request body', async () => {
       await loginReq({ random: 'random' }, badRequest);
       await loginReq({ ...removeField(validCredentials) }, badRequest);
       await loginReq({ ...validCredentials, username: 123 }, badRequest);
       await loginReq({ ...validCredentials, password: 123 }, badRequest);
     });
-    // [401] Invalid login credentials.
+    // Invalid login credentials.
     it('should return 401 for invalid login credentials', async () => {
-      await login({ username: 'Hacker', password: 'hackerman' }, unauthorized);
+      await loginReq(
+        { username: 'Hacker', password: 'hackerman' },
+        unauthorized
+      );
     });
-    // [200] Valid login credentials.
+
+    // Valid login credentials.
     it('should return bearer token for valid login credentials', async () => {
-      const res = await loginReq(userCredentials, { code: 200 });
-      expect(res.body).to.have.property('token');
-      expect(res.body).to.have.property('token');
+      const { body } = await loginReq(userCredentials, { code: 200 });
+      expect(body).to.have.property('token');
+      expect(body).to.have.property('user');
+      const user = await User.findById(body.user.id);
+      expect(body.user).to.eql(user.toJSON());
     });
   });
 });

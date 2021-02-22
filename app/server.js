@@ -10,13 +10,14 @@ import * as routes from './controllers/index.js';
 
 const app = express();
 
-// Indicate the app is ready when DB connection is established.
-db.connect(() => app.emit('ready'));
+// Serve HTML files from public folder.
+app.use(express.static('public'));
 
 // Add JSON bodyparsing.
 app.use(bodyParser.json());
-// Serve HTML files from public folder.
-app.use(express.static('public'));
+
+// Indicate the app is ready when DB connection is established.
+db.connect(() => app.emit('ready'));
 
 // Attach pre-route middlewares.
 app.use(mware.pathProvider);

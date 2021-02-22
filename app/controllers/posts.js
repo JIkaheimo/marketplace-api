@@ -37,7 +37,7 @@ const multerUpload = multer({
 /**
  * Posts router.
  */
-const postsRouter = Router();
+export const postsRouter = Router();
 
 /**
  * Simple middleware to check if the fetched
@@ -86,20 +86,21 @@ postsRouter.get('/', async (_, res) => {
  ******************************/
 postsRouter.post(
   '/',
-  [auth.authenticate], // Make sure user is authenticated.
+  [auth.authenticate], // Make sure the user is authenticated.
   async ({ userId, body }, res) => {
     // Find the user creating a new post.
     const user = await User.findById(userId);
     // Create a new post.
     const post = new Post({
       ...body,
-      posted: new Date(),
-      location: getLocation(user),
-      seller: getSeller(user), // Store user info as seller.
+      posted: new Date(), // Generate timestamp.
+      location: getLocation(user), // Get location from the user.
+      seller: getSeller(user), // Get seller info from the user.
       imageUrls: [], // Initialize empty image array.
     });
     // Save the newly created post.
     const savedPost = await post.save();
+    // Return th created post.
     res.json(savedPost);
   }
 );
@@ -127,8 +128,11 @@ postsRouter.post(
   }
 );
 
-// [GET] Display a post with the id.
+/*****************************************************
+ ** [GET] FETCHES/DISPLAYS A POST WITH THE GIVEN ID **
+ *****************************************************/
 postsRouter.get('/:id', async (req, res) => {
+  // Just return the post parsed by middleware.
   res.json(req['post']);
 });
 
@@ -137,26 +141,26 @@ postsRouter.get('/:id', async (req, res) => {
  ***************************************************/
 postsRouter.post(
   '/:id/upload',
-  [auth.authenticate, authorize, multerUpload.array('fileName', 4)],
+  [
+    auth.authenticate, // Make sure the user is authenticated
+    authorize, // Make sure the is authorized to upload post images.
+    multerUpload.array('fileName', 4),
+  ],
   async ({ files = [], post, hostPath }, res) => {
-    console.log(files);
     // Remove old images.
     const removePromises = post.imageUrls.map(imageUrl => {
       const imageFile = path.join(IMAGES_PATH, imageUrl.split('/')[-1]);
       return fs.rm(imageFile);
     });
     await Promise.all(removePromises);
-    console.log('REEE', 'WHTASDASD');
     // Add image extension to image names.
     const imageNames = files.map(
       file => `${file.path}.${file.mimetype.split('/')[1]}`
     );
-    console.log('NAMES', imageNames);
     // Map image names to the corresponding paths.
     const imageUrls = imageNames.map(
-      imageName => `${hostPath}/api/images/${imageName.replace('\\', '/')}`
+      imageName => `${hostPath}/api/images/${imageName.split('\\')[1]}`
     );
-    console.log('URLS', imageUrls);
     // Rename files.
     const renamePromises = files.map(file =>
       fs.rename(file.path, `${file.path}.${file.mimetype.split('/')[1]}`)
@@ -173,12 +177,12 @@ postsRouter.post(
  ** [PUT] MODIFY A POST **
  *************************/
 postsRouter.put(
-  '/:id', // post id
+  '/:id', // Id of post to modify.
   [
     auth.authenticate, // Make sure the user is logged in.
     authorize, // Make sure the is authorized to modify the post.
   ],
-  async ({ params: { id }, body }, res, next) => {
+  async ({ params: { id }, body }, res) => {
     // Update the post with the provided data.
     const updatedPost = await Post.findByIdAndUpdate(id, body, { new: true });
     // Return the updated post.
@@ -190,12 +194,14 @@ postsRouter.put(
  ** [DELETE] DELETE A POST **
  ****************************/
 postsRouter.delete(
-  '/:id',
+  '/:id', // Id of post to delete.
   [
     auth.authenticate, // Make sure the user is logged in.
     authorize, // Make sure the is authorized to delete the post.
   ],
-  async ({ params: { id } }, res) => {
+  async ({ params: { id }, body }, res, next) => {
+    // Make sure body is empty.
+    if (Object.values(body).length > 0) return next(badRequestError());
     // Delete the post.
     await Post.findByIdAndRemove(id);
     // Return the 204 (No Content)
