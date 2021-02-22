@@ -1,6 +1,12 @@
 import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
 import uniqueValidator from 'mongoose-unique-validator';
+import validator from 'validator';
+
+const isValidDate = dateString => {
+  var regEx = /^\d{4}-\d{2}-\d{2}$/;
+  return dateString.match(regEx) != null;
+};
 
 /**
  * Schema of address.
@@ -36,6 +42,7 @@ export const userSchema = mongoose.Schema(
       type: String,
       required: true,
       unique: true,
+      validate: validator.isEmail,
     },
     username: {
       type: String,
@@ -47,12 +54,14 @@ export const userSchema = mongoose.Schema(
       required: true,
     },
     birthDate: {
-      type: Date,
+      type: String,
       required: true,
+      validator: isValidDate,
     },
     creationDate: {
-      type: Date,
+      type: String,
       required: true,
+      validate: isValidDate,
     },
     address: {
       type: addressSchema,

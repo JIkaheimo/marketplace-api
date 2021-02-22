@@ -43,8 +43,8 @@ export type Seller = {
 export interface User extends Seller {
   passwordHash?: string;
   id?: ObjectID;
-  birthDate: Date;
-  creationDate?: Date;
+  birthDate: string;
+  creationDate?: string;
   address: Address;
   password?: string;
 }

@@ -22,6 +22,7 @@ import {
   notFoundError,
 } from '../utils/errors.js';
 import { IMAGES_PATH } from '../utils/config.js';
+import { validatePost } from '../utils/middleware.js';
 
 // Configure multer to.
 const multerUpload = multer({
@@ -86,13 +87,13 @@ postsRouter.get('/', async (_, res) => {
  ******************************/
 postsRouter.post(
   '/',
-  [auth.authenticate], // Make sure the user is authenticated.
-  async ({ userId, body }, res) => {
+  [auth.authenticate, validatePost], // Make sure the user is authenticated.
+  async ({ userId, parsed }, res) => {
     // Find the user creating a new post.
     const user = await User.findById(userId);
     // Create a new post.
     const post = new Post({
-      ...body,
+      ...parsed,
       posted: new Date(), // Generate timestamp.
       location: getLocation(user), // Get location from the user.
       seller: getSeller(user), // Get seller info from the user.
@@ -181,10 +182,11 @@ postsRouter.put(
   [
     auth.authenticate, // Make sure the user is logged in.
     authorize, // Make sure the is authorized to modify the post.
+    validatePost, // Make sure post is in valid format.
   ],
-  async ({ params: { id }, body }, res) => {
+  async ({ params: { id }, parsed }, res) => {
     // Update the post with the provided data.
-    const updatedPost = await Post.findByIdAndUpdate(id, body, { new: true });
+    const updatedPost = await Post.findByIdAndUpdate(id, parsed, { new: true });
     // Return the updated post.
     res.json(updatedPost);
   }

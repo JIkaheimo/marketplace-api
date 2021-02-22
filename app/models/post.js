@@ -124,6 +124,7 @@ postSchema.pre('findOneAndUpdate', function (next) {
 postSchema.set('toJSON', {
   transform: (document, post) => {
     post.id = post._id.toString();
+    post.posted = post.posted.toString();
     delete post._id;
     delete post.__v;
   },

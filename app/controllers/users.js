@@ -21,6 +21,8 @@ usersRouter.post('/', [hash], async ({ body, passwordHash }, res, next) => {
   );
   // Save the user.
   const savedUser = await user.save();
+
+  console.dir(savedUser.toJSON());
   // Return the newly created user and token.
   res.json({ user: savedUser, token: savedUser.token });
 });

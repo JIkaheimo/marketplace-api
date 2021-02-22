@@ -42,7 +42,7 @@ export const newUser = (password = faker.internet.password()) => ({
   username: faker.internet.userName(),
   address: address(),
   phoneNumber: faker.phone.phoneNumber(),
-  birthDate: faker.date.recent(),
+  birthDate: faker.date.past().toISOString().split('T')[0],
   password,
 });
 
@@ -55,7 +55,7 @@ export const user = password => ({
   ...newUser(password),
   id: mongoose.Types.ObjectId(),
   passwordHash: bcrypt.hashSync(password, SALT_ROUNDS),
-  creationDate: faker.date.recent(),
+  creationDate: faker.date.recent().toISOString().split('T')[0],
 });
 
 /**
