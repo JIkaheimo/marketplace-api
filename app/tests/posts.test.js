@@ -3,13 +3,13 @@
 import mongoose from 'mongoose';
 import faker from 'faker';
 import path from 'path';
-
 import supertest from 'supertest';
 import { default as chai } from 'chai';
 const { expect } = chai;
+import fs from 'fs/promises';
 
 import app from '../server.js';
-import { Post, User } from '../models/index.js';
+import { getLocation, getSeller, Post, User } from '../models/index.js';
 
 import {
   withToken,
@@ -19,12 +19,13 @@ import {
   fakeId,
   getNewPost,
   getToken,
-  getSeller,
-  getLocation,
+  createUsers,
 } from './helpers.js';
 
 import { ERRORS } from '../constants.js';
-const { unauthorized, notFound } = ERRORS;
+import { IMAGES_PATH } from '../utils/config.js';
+
+const { unauthorized, notFound, badRequest } = ERRORS;
 
 const api = supertest(app);
 
@@ -35,8 +36,7 @@ describe('when there are some posts in the database', () => {
   //
   beforeEach('Create test user.', async () => {
     // Add user to database.
-    await User.deleteMany({});
-    await User.create(initialUser);
+    await createUsers([initialUser]);
   });
   //
   beforeEach('Create test posts.', async () => {
@@ -123,6 +123,15 @@ describe('when there are some posts in the database', () => {
           ...initialPosts[0],
           category: 'I am not a category',
         });
+      });
+
+      it('should not create a post with extranous fields', async () => {
+        await withToken(api.post('/api/posts'), token)
+          .send({ ...getNewPost(), extra: 'I am extra!' })
+          .expect(badRequest.code)
+          .expect('Content-Type', /application\/json/);
+        const postsAtEnd = await postsInDb();
+        expect(postsAtEnd).to.have.length(initialPosts.length);
       });
     });
 
@@ -222,21 +231,58 @@ describe('when there are some posts in the database', () => {
       expect(ids).not.to.contain(postToDelete.id);
     });
   });
-  /****************************
-   ** UPLOADING A POST IMAGE **
-   ****************************/
-  describe('POST /api/posts/:id/upload', () => {
-    it('should upload attached images', async () => {
-      const postsAtStart = await postsInDb();
-      const postToView = postsAtStart[0];
 
-      await withToken(api.post(`/api/posts/${postToView.id}/upload`), token)
-        .attach(
-          'fileName',
-          path.join(path.dirname(require.main.filename), '1.png')
-        )
-        .expect(200);
+  /*****************************
+   ** UPLOADING POST IMAGE(S) **
+   *****************************/
+  describe('POST /api/posts/:id/upload', () => {
+    let post = null;
+    let upload = null;
+    //
+    beforeEach('Randomize post', async () => {
+      const posts = await postsInDb();
+      post = faker.random.arrayElement(posts);
+      upload = () => withToken(api.post(`/api/posts/${post.id}/upload`), token);
     });
+    //
+    afterEach('Remove image folder', async () => {
+      //await fs.rm(IMAGES_PATH, { recursive: true, force: true });
+    });
+
+    // Removing images.
+    it('should remove the images when none is provided', async () => {
+      await upload().send().expect(200).expect([]);
+    });
+
+    // Uploading one image.
+    it('should upload attached image', async () => {
+      await upload().attach('fileName', './app/tests/1.png').expect(200);
+    });
+
+    // Uploading multiple images.
+    it('should upload attached images', async () => {
+      const res = await upload()
+        .attach('fileName', './app/tests/1.png')
+        .attach('fileName', './app/tests/1.png')
+        .attach('fileName', './app/tests/1.png')
+        .attach('fileName', './app/tests/1.png')
+        .expect(200);
+      expect(res.body).to.have.lengthOf(4);
+      expect(res.body[0]).to.be('string');
+    });
+
+    // Uploading more than max num of images.
+    it('should return a correct response code for invalid amount of images', async () => {
+      await upload()
+        .attach('fileName', './app/tests/1.png')
+        .attach('fileName', './app/tests/1.png')
+        .attach('fileName', './app/tests/1.png')
+        .attach('fileName', './app/tests/1.png')
+        .attach('fileName', './app/tests/1.png')
+        .expect(badRequest.code)
+        .expect({ message: badRequest.message });
+    });
+    //
   });
 });
 

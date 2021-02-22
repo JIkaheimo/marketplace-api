@@ -8,14 +8,7 @@
 import faker from 'faker';
 
 import { Post, User } from '../models/index.js';
-import {
-  post,
-  user,
-  newPost,
-  newUser,
-  getLocation,
-  getSeller,
-} from './data.js';
+import { post, user, newPost, newUser } from './data.js';
 
 export const initialUser = user('testaaja123');
 export const initialPosts = Array(10)
@@ -27,10 +20,17 @@ export const initialPasswords = Array(10)
   .map(() => faker.internet.password());
 export const initialUsers = initialPasswords.map(pw => user(pw));
 
+export const createUsers = async usersToCreate => {
+  const usersWithoutPassword = usersToCreate.map(user => {
+    const { password, ...others } = user;
+    return others;
+  });
+  await User.deleteMany();
+  await User.insertMany(usersWithoutPassword);
+};
+
 export const getNewPost = newPost;
 export const getNewUser = newUser;
-export { getLocation };
-export { getSeller };
 
 /**
  * Returns a bearer token based on the given username.
@@ -79,6 +79,4 @@ export default {
   usersInDb,
   getNewPost,
   getNewUser,
-  getLocation,
-  getSeller,
 };

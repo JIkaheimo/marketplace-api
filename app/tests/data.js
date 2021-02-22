@@ -8,6 +8,7 @@
 import faker from 'faker';
 import bcrypt from 'bcrypt';
 import mongoose from 'mongoose';
+import { getSeller } from '../models/index.js';
 
 const SALT_ROUNDS = 10;
 
@@ -41,7 +42,7 @@ export const newUser = (password = faker.internet.password()) => ({
   username: faker.internet.userName(),
   address: address(),
   phoneNumber: faker.phone.phoneNumber(),
-  birthDate: faker.date.past(),
+  birthDate: faker.date.recent(),
   password,
 });
 
@@ -99,24 +100,6 @@ export const login = () => ({
 });
 
 /**
- * Returns seller info from the given user.
- * @param {import('../types').User} user
- * @returns {import('../types').Seller}
- */
-export const getSeller = ({ email, phoneNumber, username }) => ({
-  email,
-  phoneNumber,
-  username,
-});
-
-/**
- * Returns location info from the given user.
- * @param {import('../types').User} user
- * @returns {import('../types').Address}
- */
-export const getLocation = ({ address }) => ({ ...address });
-
-/**
  * Returns a new object with a random field removed.
  * @param {Object} obj Object to remove the field from.
  * @returns {Object} Object with a random field removed.
@@ -134,6 +117,5 @@ export default {
   post,
   newPost,
   newUser,
-  getSeller,
   removeField,
 };

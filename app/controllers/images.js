@@ -7,18 +7,16 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { Router } from 'express';
+import { IMAGES_PATH } from '../utils/config.js';
 
 const imagesRouter = Router();
-
-const IMAGES_PATH = path.join('.', '..', '..', 'images');
 
 // [GET] Gets path for all the image resources.
 imagesRouter.get('/', async (req, res) => {
   // Read available image filenames from image folder.
   const filenames = await fs.readdir(IMAGES_PATH);
-
   const filepaths = filenames.map(name => `${req.fullPath}/${name}`);
-  res.json({ images: filepaths });
+  res.json(filepaths);
 });
 
 // [GET] Returns an image resource with the specified name.

@@ -2,6 +2,9 @@ import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
 import uniqueValidator from 'mongoose-unique-validator';
 
+/**
+ * Address Mongoose schema.
+ */
 export const addressSchema = mongoose.Schema(
   {
     city: {
@@ -21,41 +24,65 @@ export const addressSchema = mongoose.Schema(
       required: true,
     },
   },
-  { _id: false }
+  { _id: false, strict: 'throw' }
 );
 
-export const userSchema = mongoose.Schema({
-  email: {
-    type: String,
-    required: true,
-    unique: true,
+/**
+ * User Mongoose schema.
+ */
+export const userSchema = mongoose.Schema(
+  {
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+    },
+    username: {
+      type: String,
+      required: true,
+      unique: [true, 'User with that username aready exists!'],
+    },
+    passwordHash: {
+      type: String,
+      required: true,
+    },
+    birthDate: {
+      type: Date,
+      required: true,
+    },
+    creationDate: {
+      type: Date,
+      required: true,
+    },
+    address: {
+      type: addressSchema,
+      required: true,
+    },
+    phoneNumber: {
+      type: String,
+      required: true,
+    },
   },
-  username: {
-    type: String,
-    required: true,
-    unique: [true, 'User with that username aready exists!'],
-  },
-  passwordHash: {
-    type: String,
-    required: true,
-  },
-  birthDate: {
-    type: Date,
-    required: true,
-  },
-  creationDate: {
-    type: Date,
-    required: true,
-  },
-  address: {
-    type: addressSchema,
-    required: true,
-  },
-  phoneNumber: {
-    type: String,
-    required: true,
-  },
+  { strict: 'throw' }
+);
+
+/**
+ * Returns seller info from the given user.
+ * @param {import('../types').User} user
+ * @returns {import('../types').Seller}
+ */
+export const getSeller = ({ email, phoneNumber, username }) => ({
+  email,
+  phoneNumber,
+  username,
 });
+
+/**
+ * Returns location info from the given user.
+ * @param {import('../types').User} user
+ * @returns {import('../types').Address}
+ */
+export const getLocation = ({ address }) => ({ ...address });
 
 userSchema.virtual('token').get(function () {
   const userForToken = {
@@ -66,13 +93,16 @@ userSchema.virtual('token').get(function () {
   return jwt.sign(userForToken, process.env.SECRET);
 });
 
+// Add unique validator for email and username.
 userSchema.plugin(uniqueValidator, { message: '{PATH} already exists!' });
 
+// Validators should be run when saving models.
 userSchema.pre('findOneAndUpdate', function (next) {
   this.options.runValidators = true;
   next();
 });
 
+// Remove any private data when sending data as JSON.
 userSchema.set('toJSON', {
   transform: (document, user) => {
     user.id = user._id.toString();
@@ -89,4 +119,6 @@ export default {
   User,
   userSchema,
   addressSchema,
+  getLocation,
+  getSeller,
 };

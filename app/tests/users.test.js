@@ -6,7 +6,7 @@ const { expect } = chai;
 
 import app from '../server.js';
 import { User } from '../models/index.js';
-import { usersInDb, initialUsers, getNewUser } from './helpers.js';
+import { usersInDb, initialUsers, getNewUser, createUsers } from './helpers.js';
 import { ERRORS } from '../constants.js';
 import { login, removeField } from './data.js';
 
@@ -23,8 +23,7 @@ const loginReq = (body, { message, code }) => {
 describe('when there is one user in the database', () => {
   //
   beforeEach(async () => {
-    await User.deleteMany({});
-    await User.insertMany(initialUsers);
+    await createUsers(initialUsers);
   });
 
   /*************************
@@ -122,6 +121,8 @@ describe('when there is one user in the database', () => {
     // [200] Valid login credentials.
     it('should return bearer token for valid login credentials', async () => {
       const res = await loginReq(userCredentials, { code: 200 });
+      expect(res.body).to.have.property('token');
+      expect(res.body).to.have.property('token');
     });
   });
 });

@@ -15,7 +15,7 @@ export const deliverySchema = mongoose.Schema(
       cast: false,
     },
   },
-  { _id: false }
+  { _id: false, strict: 'throw' }
 );
 
 export const sellerSchema = mongoose.Schema(
@@ -33,63 +33,66 @@ export const sellerSchema = mongoose.Schema(
       required: true,
     },
   },
-  { _id: false }
+  { _id: false, strict: 'throw' }
 );
 
-export const postSchema = mongoose.Schema({
-  description: {
-    type: String,
-    required: true,
-    cast: false,
+export const postSchema = mongoose.Schema(
+  {
+    description: {
+      type: String,
+      required: true,
+      cast: false,
+    },
+    title: {
+      type: String,
+      required: true,
+      minlength: 8,
+      maxlength: 25,
+      cast: false,
+    },
+    category: {
+      type: String,
+      enum: ['computers', 'electronics', 'cars', 'pets', 'food', 'drinks'],
+      required: true,
+      cast: false,
+    },
+    askingPrice: {
+      type: Number,
+      required: true,
+      min: 1,
+      max: 9999999,
+      cast: false,
+    },
+    deliveryType: {
+      type: deliverySchema,
+      required: true,
+      cast: false,
+    },
+    imageUrls: {
+      type: [
+        {
+          type: String,
+        },
+      ],
+      validate: value => value.length <= 4,
+    },
+    posted: {
+      type: Date,
+      required: true,
+      immutable: true,
+      cast: false,
+    },
+    location: {
+      type: addressSchema,
+      required: true,
+    },
+    seller: {
+      type: sellerSchema,
+      required: true,
+    },
   },
-  title: {
-    type: String,
-    required: true,
-    minlength: 8,
-    maxlength: 25,
-    cast: false,
-  },
-  category: {
-    type: String,
-    enum: ['computers', 'electronics', 'cars', 'pets', 'food', 'drinks'],
-    required: true,
-    cast: false,
-  },
-  askingPrice: {
-    type: Number,
-    required: true,
-    min: 1,
-    max: 9999999,
-    cast: false,
-  },
-  deliveryType: {
-    type: deliverySchema,
-    required: true,
-    cast: false,
-  },
-  imageUrls: {
-    type: [
-      {
-        type: String,
-      },
-    ],
-    validate: value => value.length <= 4,
-  },
-  posted: {
-    type: Date,
-    required: true,
-    immutable: true,
-    cast: false,
-  },
-  location: {
-    type: addressSchema,
-    required: true,
-  },
-  seller: {
-    type: sellerSchema,
-    required: true,
-  },
-});
+  { strict: 'throw' }
+);
 
 postSchema.pre('findOneAndUpdate', function (next) {
   this.options.runValidators = true;

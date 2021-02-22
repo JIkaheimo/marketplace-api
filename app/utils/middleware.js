@@ -49,7 +49,8 @@ export const validateLogin = bodyValidator(loginParser);
  * @type {import('express').RequestHandler}
  */
 export const pathProvider = (req, res, next) => {
-  req['fullPath'] = `${req.protocol}://${req.get('host')}${req.originalUrl}`;
+  req['hostPath'] = `${req.protocol}://${req.get('host')}`;
+  req['fullPath'] = `${req['hostPath']}${req.originalUrl}`;
   next();
 };
 
@@ -82,6 +83,11 @@ export const errorHandler = (error, req, res, next) => {
           break;
       }
       break;
+    // Triggers when the user tries to upload invalid amount of files,
+    // invalid fields or invalid type of files.
+    case 'MulterError':
+    // Triggers when there is some extanous fields in request.
+    case 'StrictModeError':
     // Triggers for invalid data format.
     case 'SyntaxError':
     // Triggers for invalid request body.

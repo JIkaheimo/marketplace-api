@@ -1,0 +1,1061 @@
+openapi: 3.0.0
+info:
+  title: marketplace-API
+  version: '1.0'
+  description: |-
+    Simple API developed to serve as a platform for selling and buying used items. As an example of this in Finland would be tori.fi or globally ebay.com
+
+    Related Course
+    Building Cloud Integration, spring 2021
+
+    Design and Development: Jaakko Ikäheimo, Konsta Holm
+
+    This API implements the following functional requirements:
+    - User registration and login. 
+    - Post creation for authenticated users.
+    - Post modification for authenticated users.
+    - Post deletion for authenticated users.
+    - Post browsing/searching for all the users.
+    - Post image upload for authenticated users.
+    - Image browsing.
+  contact:
+    name: Jaakko Ikäheimo
+servers:
+  - url: 'http://localhost:3000'
+    description: Dev
+  - url: 'https://jikaheimo.software/marketplace'
+    description: Release
+paths:
+  /api/users:
+    parameters: []
+    post:
+      summary: Register user
+      operationId: register-user
+      responses:
+        '200':
+          description: User was successfully registered.
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Newly created user and user's bearer token.
+                properties:
+                  user:
+                    $ref: '#/components/schemas/UserProperties'
+                  token:
+                    $ref: '#/components/schemas/BearerToken'
+                required:
+                  - user
+                  - token
+              examples:
+                default:
+                  value:
+                    user:
+                      id: 5099803df3f4948bd2f98391
+                      email: testaaja123@test.com
+                      birthDate: '1997-10-31'
+                      creationDate: '2020-01-01'
+                      username: Testaaja123
+                      address:
+                        city: Oulu
+                        country: Finland
+                        postalCode: '90550'
+                        street: Testaajantie 123
+                      phoneNumber: '+358401231231'
+                    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlRlc3RhYWphMzQ1IiwiaWQiOiI2MDMwMTUzYjI0MjIyNjM1NjhlZWJlZjYiLCJpYXQiOjE2MTM3NjM5MTR9.Z1vBx763s23IxDPP7DpRo1KyYkZndOzLcqazDWqdymE
+        '400':
+          $ref: '#/components/responses/400'
+        '409':
+          $ref: '#/components/responses/409'
+        '500':
+          $ref: '#/components/responses/500'
+      description: 'Registers a new user. Registering for the API authenticates the user to create, update and delete posts.'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserProperties'
+            examples:
+              default:
+                value:
+                  email: testaaja123@test.com
+                  username: Testaaja123
+                  address:
+                    city: Oulu
+                    country: Finland
+                    postalCode: '90550'
+                    street: Testaajantie 123
+                  phoneNumber: '+358401231231'
+                  birthDate: '1994-08-05'
+                  password: testaaja
+        description: Valid request body for registration.
+  '/api/posts/{id}':
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      summary: Display post
+      tags: []
+      responses:
+        '200':
+          description: Post with the given id.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostProperties'
+              examples:
+                basic:
+                  value:
+                    id: 5099803df3f4948bd2f98391
+                    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed vestibulum justo. Pellentesque orci eros, convallis fringilla velit at, consequat volutpat urna. Mauris nec dui sapien. Praesent at mattis urna. Aenean pellentesque placerat vulputate. Aliquam vel orci aliquam magna pretium viverra ullamcorper bibendum metus. Maecenas eu nisl interdum, lacinia ipsum vel, tempus velit. Etiam efficitur aliquet justo. Morbi rutrum malesuada dui nec vulputate. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed porttitor molestie augue placerat rhoncus. Morbi eu nisl id urna aliquet vestibulum sed semper metus. Suspendisse tempus lorem lacus, non fringilla est sodales at. Maecenas congue facilisis erat, vel vestibulum justo scelerisque sed. Donec vel aliquet ante, a varius purus. Nam tempor pellentesque lorem, eu convallis magna fringilla sit amet.'
+                    title: Factory New Audi A4
+                    category: cars
+                    askingPrice: 20000
+                    posted: '2019-08-24T14:15:22Z'
+                    deliveryType:
+                      shipping: true
+                      pickup: true
+                    seller:
+                      email: testaaja123@test.com
+                      phoneNumber: '+358401231231'
+                      username: Testaaja123
+                    location:
+                      city: Oulu
+                      country: Finland
+                      postalCode: '90550'
+                      street: Testaajantie 123
+                    imageUrls:
+                      - www.jikaheimo.software/api/products/1/images/1.png
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+      operationId: display-post
+      description: Displays/fetches a post with the given id.
+    put:
+      summary: Modify a post
+      operationId: modify-post
+      responses:
+        '200':
+          description: Modified post.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostProperties'
+              examples:
+                default:
+                  value:
+                    id: 5099803df3f4948bd2f98391
+                    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed vestibulum justo. Pellentesque orci eros, convallis fringilla velit at, consequat volutpat urna. Mauris nec dui sapien. Praesent at mattis urna. Aenean pellentesque placerat vulputate. Aliquam vel orci aliquam magna pretium viverra ullamcorper bibendum metus. Maecenas eu nisl interdum, lacinia ipsum vel, tempus velit. Etiam efficitur aliquet justo. Morbi rutrum malesuada dui nec vulputate. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed porttitor molestie augue placerat rhoncus. Morbi eu nisl id urna aliquet vestibulum sed semper metus. Suspendisse tempus lorem lacus, non fringilla est sodales at. Maecenas congue facilisis erat, vel vestibulum justo scelerisque sed. Donec vel aliquet ante, a varius purus. Nam tempor pellentesque lorem, eu convallis magna fringilla sit amet.'
+                    title: Factory New Audi A4
+                    category: cars
+                    askingPrice: 20000
+                    posted: '2019-08-24T14:15:22Z'
+                    deliveryType:
+                      shipping: true
+                      pickup: true
+                    seller:
+                      email: testaaja123@test.com
+                      phoneNumber: '+358401231231'
+                      username: Testaaja123
+                    location:
+                      city: Oulu
+                      country: Finland
+                      postalCode: '90550'
+                      street: Testaajantie 123
+                    imageUrls:
+                      - www.jikaheimo.software/api/products/1/images/1.png
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+      description: Modifies a post with the given id. To modify a post user has to be authenticated and authorized.
+      security:
+        - JSONWebToken: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostProperties'
+            examples:
+              basic:
+                value:
+                  description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed vestibulum justo. Pellentesque orci eros, convallis fringilla velit at, consequat volutpat urna. Mauris nec dui sapien. Praesent at mattis urna. Aenean pellentesque placerat vulputate. Aliquam vel orci aliquam magna pretium viverra ullamcorper bibendum metus. Maecenas eu nisl interdum, lacinia ipsum vel, tempus velit. Etiam efficitur aliquet justo. Morbi rutrum malesuada dui nec vulputate. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed porttitor molestie augue placerat rhoncus. Morbi eu nisl id urna aliquet vestibulum sed semper metus. Suspendisse tempus lorem lacus, non fringilla est sodales at. Maecenas congue facilisis erat, vel vestibulum justo scelerisque sed. Donec vel aliquet ante, a varius purus. Nam tempor pellentesque lorem, eu convallis magna fringilla sit amet.'
+                  title: Factory New Audi A4
+                  category: cars
+                  askingPrice: 20000
+                  deliveryType:
+                    shipping: true
+                    pickup: true
+        description: Required data in correct format to modify a post.
+      parameters:
+        - $ref: '#/components/parameters/Bearer'
+    delete:
+      summary: Delete a post
+      operationId: delete-post
+      responses:
+        '204':
+          description: Post was found and sucessfully deleted.
+          headers: {}
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+      security:
+        - JSONWebToken: []
+      description: Deletes a post with the given id. To delete a post the user has to be authenticated and authorized.
+      parameters:
+        - $ref: '#/components/parameters/Bearer'
+  /api/login:
+    post:
+      summary: Login user
+      operationId: login-user
+      responses:
+        '200':
+          description: User was successfully authenticated. Response will return the bearer access token and the user information of the authenticated user.
+          content:
+            application/json:
+              schema:
+                type: object
+                description: Properties for successful login.
+                properties:
+                  token:
+                    $ref: '#/components/schemas/BearerToken'
+                  user:
+                    $ref: '#/components/schemas/UserProperties'
+                required:
+                  - token
+                  - user
+              examples:
+                default:
+                  value:
+                    token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlRlc3RhYWphMzQ1IiwiaWQiOiI2MDMwMTUzYjI0MjIyNjM1NjhlZWJlZjYiLCJpYXQiOjE2MTM3NjM5MTR9.Z1vBx763s23IxDPP7DpRo1KyYkZndOzLcqazDWqdymE
+                    user:
+                      id: 5099803df3f4948bd2f98391
+                      email: testaaja123@test.com
+                      birthDate: '1997-10-31'
+                      creationDate: '2020-01-01'
+                      username: Testaaja123
+                      address:
+                        city: Oulu
+                        country: Finland
+                        postalCode: '90550'
+                        street: Testaajantie 123
+                      phoneNumber: '+358401231231'
+            application/xml:
+              schema:
+                type: object
+                properties: {}
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+      description: Authenticates the user to use some Marketplace functionalities. Returns the user related information and bearer token on successful request.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginProperties'
+            examples:
+              default:
+                value:
+                  username: Testaaja
+                  password: testaaja123
+        description: Username and password for authentication.
+  /api/posts:
+    get:
+      summary: Display posts
+      tags: []
+      responses:
+        '200':
+          description: Successfully returned a list of posts.
+          content:
+            application/json:
+              schema:
+                type: array
+                description: Array of fetched and paged posts.
+                items:
+                  $ref: '#/components/schemas/PostProperties'
+              examples:
+                basic:
+                  value:
+                    - id: 5099803df3f4948bd2f98391
+                      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed vestibulum justo. Pellentesque orci eros, convallis fringilla velit at, consequat volutpat urna. Mauris nec dui sapien. Praesent at mattis urna. Aenean pellentesque placerat vulputate. Aliquam vel orci aliquam magna pretium viverra ullamcorper bibendum metus. Maecenas eu nisl interdum, lacinia ipsum vel, tempus velit. Etiam efficitur aliquet justo. Morbi rutrum malesuada dui nec vulputate. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed porttitor molestie augue placerat rhoncus. Morbi eu nisl id urna aliquet vestibulum sed semper metus. Suspendisse tempus lorem lacus, non fringilla est sodales at. Maecenas congue facilisis erat, vel vestibulum justo scelerisque sed. Donec vel aliquet ante, a varius purus. Nam tempor pellentesque lorem, eu convallis magna fringilla sit amet.'
+                      title: Factory New Audi A4
+                      category: cars
+                      askingPrice: 20000
+                      posted: '2019-08-24T14:15:22Z'
+                      deliveryType:
+                        shipping: true
+                        pickup: true
+                      seller:
+                        email: testaaja123@test.com
+                        phoneNumber: '+358401231231'
+                        username: Testaaja123
+                      location:
+                        city: Oulu
+                        country: Finland
+                        postalCode: '90550'
+                        street: Testaajantie 123
+                      imageUrls:
+                        - www.jikaheimo.software/api/products/1/images/1.png
+        '500':
+          $ref: '#/components/responses/500'
+      operationId: display-posts
+      description: Fetches and displays posts. By default uses paging where the limit is 20 and offset 0.
+      parameters:
+        - schema:
+            type: number
+            default: 0
+            example: 5
+            minimum: 0
+          in: query
+          name: offset
+          description: The number of items to skip before starting to collect the result set.
+        - schema:
+            type: number
+            minimum: 1
+            maximum: 100
+            example: 50
+            default: 20
+          in: query
+          name: limit
+          description: The number of posts to return.
+    parameters: []
+    post:
+      summary: Create a post
+      operationId: create-post
+      responses:
+        '201':
+          description: Newly created post.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostProperties'
+              examples:
+                default:
+                  value:
+                    id: 5099803df3f4948bd2f98391
+                    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed vestibulum justo. Pellentesque orci eros, convallis fringilla velit at, consequat volutpat urna. Mauris nec dui sapien. Praesent at mattis urna. Aenean pellentesque placerat vulputate. Aliquam vel orci aliquam magna pretium viverra ullamcorper bibendum metus. Maecenas eu nisl interdum, lacinia ipsum vel, tempus velit. Etiam efficitur aliquet justo. Morbi rutrum malesuada dui nec vulputate. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed porttitor molestie augue placerat rhoncus. Morbi eu nisl id urna aliquet vestibulum sed semper metus. Suspendisse tempus lorem lacus, non fringilla est sodales at. Maecenas congue facilisis erat, vel vestibulum justo scelerisque sed. Donec vel aliquet ante, a varius purus. Nam tempor pellentesque lorem, eu convallis magna fringilla sit amet.'
+                    title: Factory New Audi A4
+                    category: cars
+                    askingPrice: 20000
+                    posted: '2019-08-24T14:15:22Z'
+                    deliveryType:
+                      shipping: true
+                      pickup: true
+                    seller:
+                      email: testaaja123@test.com
+                      phoneNumber: '+358401231231'
+                      username: Testaaja123
+                    location:
+                      city: Oulu
+                      country: Finland
+                      postalCode: '90550'
+                      street: Testaajantie 123
+                    imageUrls:
+                      - www.jikaheimo.software/api/products/1/images/1.png
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '500':
+          $ref: '#/components/responses/500'
+      description: Creates a new post. To create a new post user must be authenticated.
+      security:
+        - JSONWebToken: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostProperties'
+            examples:
+              default:
+                value:
+                  description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed vestibulum justo. Pellentesque orci eros, convallis fringilla velit at, consequat volutpat urna. Mauris nec dui sapien. Praesent at mattis urna. Aenean pellentesque placerat vulputate. Aliquam vel orci aliquam magna pretium viverra ullamcorper bibendum metus. Maecenas eu nisl interdum, lacinia ipsum vel, tempus velit. Etiam efficitur aliquet justo. Morbi rutrum malesuada dui nec vulputate. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed porttitor molestie augue placerat rhoncus. Morbi eu nisl id urna aliquet vestibulum sed semper metus. Suspendisse tempus lorem lacus, non fringilla est sodales at. Maecenas congue facilisis erat, vel vestibulum justo scelerisque sed. Donec vel aliquet ante, a varius purus. Nam tempor pellentesque lorem, eu convallis magna fringilla sit amet.'
+                  title: Factory New Audi A4
+                  category: cars
+                  askingPrice: 20000
+                  deliveryType:
+                    shipping: true
+                    pickup: true
+        description: Required data in correct format to create a new post.
+      parameters:
+        - $ref: '#/components/parameters/Bearer'
+  /api/posts/search:
+    post:
+      summary: Search posts
+      operationId: search-posts
+      responses:
+        '200':
+          description: Successfully searched posts.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PostProperties'
+              examples:
+                basic:
+                  value:
+                    - id: 5099803df3f4948bd2f98391
+                      description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed vestibulum justo. Pellentesque orci eros, convallis fringilla velit at, consequat volutpat urna. Mauris nec dui sapien. Praesent at mattis urna. Aenean pellentesque placerat vulputate. Aliquam vel orci aliquam magna pretium viverra ullamcorper bibendum metus. Maecenas eu nisl interdum, lacinia ipsum vel, tempus velit. Etiam efficitur aliquet justo. Morbi rutrum malesuada dui nec vulputate. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed porttitor molestie augue placerat rhoncus. Morbi eu nisl id urna aliquet vestibulum sed semper metus. Suspendisse tempus lorem lacus, non fringilla est sodales at. Maecenas congue facilisis erat, vel vestibulum justo scelerisque sed. Donec vel aliquet ante, a varius purus. Nam tempor pellentesque lorem, eu convallis magna fringilla sit amet.'
+                      title: Factory New Audi A4
+                      category: cars
+                      askingPrice: 20000
+                      posted: '2019-08-24T14:15:22Z'
+                      deliveryType:
+                        shipping: true
+                        pickup: true
+                      seller:
+                        email: testaaja123@test.com
+                        phoneNumber: '+358401231231'
+                        username: Testaaja123
+                      location:
+                        city: Oulu
+                        country: Finland
+                        postalCode: '90550'
+                        street: Testaajantie 123
+                      imageUrls:
+                        - www.jikaheimo.software/api/images/1.png
+        '500':
+          $ref: '#/components/responses/500'
+      description: |-
+        Performs a search query for posts based on given parameters. If no search parameters is provided, returns an empty array. 
+
+        Available query parameters:
+        * country  - filters posts by country.
+        * city     - filters posts by city.
+        * posted   - filters posts by date posted.
+        * category - filters posts by category.
+      parameters: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                country:
+                  type: string
+                  description: The country of searched posts.
+                  example: Finland
+                  writeOnly: true
+                city:
+                  type: string
+                  description: The city of searched posts.
+                  example: Oulu
+                  writeOnly: true
+                posted:
+                  type: string
+                  description: The date of searched posts.
+                  format: date
+                  example: '2020-01-01'
+                  writeOnly: true
+                category:
+                  type: string
+                  description: The category of searched posts.
+                  example: cars
+                  writeOnly: true
+              writeOnly: true
+            examples:
+              default:
+                value:
+                  category: cars
+              Example 2:
+                value:
+                  country: Finland
+                  category: drinks
+        description: Body with different filters
+    parameters: []
+  '/api/posts/{id}/upload':
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    post:
+      summary: ''
+      operationId: upload-post-images
+      responses:
+        '200':
+          $ref: '#/components/responses/Images'
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+      description: |-
+        Replaces and updates post specific images with the provided ones (max 4). Also returns the corresponding API paths of the uploaded image. 
+        The user must be authenticated and authorized to upload images.
+      security:
+        - JSONWebToken: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              additionalProperties: false
+              properties:
+                filename:
+                  type: array
+                  maxItems: 4
+                  minItems: 0
+                  description: The image files to upload.
+                  items:
+                    type: string
+                    format: binary
+                    example: '[http://127.0.0.1:60740/api/images/imagesTest/3f0901e19d3ff29545af0c798925ddb2.png, http://127.0.0.1:60740/api/images/imagesTest/3f0901e19d3ff29545af0c798925asd2.png]'
+                  writeOnly: true
+              required:
+                - filename
+            examples: {}
+        description: The image files to upload with the image.
+      parameters:
+        - $ref: '#/components/parameters/Bearer'
+  /api/images:
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                description: A list of product image urls in the server.
+                items:
+                  type: string
+              examples:
+                example-1:
+                  value:
+                    - string
+        '500':
+          $ref: '#/components/responses/500'
+      operationId: display-images
+      description: Returns path of every stored post image.
+  '/api/images/{name}':
+    parameters:
+      - schema:
+          type: string
+        name: name
+        in: path
+        required: true
+        description: Name or path of the image.
+    get:
+      summary: Your GET endpoint
+      tags: []
+      responses:
+        '200':
+          description: Image file corresponding to the given identifier.
+          content:
+            image/*:
+              schema:
+                type: string
+                format: binary
+              examples:
+                default:
+                  value: string
+        '404':
+          $ref: '#/components/responses/404'
+        '500':
+          $ref: '#/components/responses/500'
+      operationId: display-image
+      description: Returns an image with the specified name/identifier.
+components:
+  schemas:
+    UserProperties:
+      type: object
+      title: User
+      description: 'User of the marketplace, in this case the seller (or buyer) of products posted.'
+      x-examples:
+        default:
+          id: 5099803df3f4948bd2f98391
+          email: testaaja123@test.com
+          birthDate: '1997-10-31'
+          creationDate: '2020-01-01'
+          username: Testaaja123
+          address:
+            city: Oulu
+            country: Finland
+            postalCode: '90550'
+            street: Testaajantie 123
+          phoneNumber: '+358401231231'
+        Example 2:
+          id: 5099803df3f4948bd2f32111
+          email: akuankka78@test.com
+          birthDate: '1930-10-31'
+          creationDate: '2020-01-01'
+          username: AkuAnkka78
+          address:
+            city: Ankkalinna
+            country: Ankkala
+            postalCode: '313'
+            street: Ankkalinnantie 123
+          phoneNumber: '+3581232310213'
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the user.
+          example: 5099803df3f4948bd2f98391
+          readOnly: true
+        email:
+          type: string
+          format: email
+          description: Email of the user.
+          example: testaaja123@test.com
+        birthDate:
+          type: string
+          format: date
+          example: '1997-10-31'
+          description: Date of birth of the user. Used for age validation.
+        creationDate:
+          type: string
+          format: date
+          description: The date user was created.
+          example: '2020-01-01'
+          readOnly: true
+        username:
+          type: string
+          description: Username of the user.
+          example: Testaaja123
+        address:
+          $ref: '#/components/schemas/LocationProperties'
+        phoneNumber:
+          type: string
+          description: Phone number of the user.
+          example: '+358401231231'
+        password:
+          type: string
+          description: Password of the user.
+          format: password
+          example: testaaja123
+          writeOnly: true
+      required:
+        - email
+        - birthDate
+        - username
+        - address
+        - phoneNumber
+    PostProperties:
+      type: object
+      title: Post
+      description: Post describes an item to be listed/sold in the marketplace
+      x-examples:
+        default:
+          id: 5099803df3f4948bd2f98391
+          description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed vestibulum justo. Pellentesque orci eros, convallis fringilla velit at, consequat volutpat urna. Mauris nec dui sapien. Praesent at mattis urna. Aenean pellentesque placerat vulputate. Aliquam vel orci aliquam magna pretium viverra ullamcorper bibendum metus. Maecenas eu nisl interdum, lacinia ipsum vel, tempus velit. Etiam efficitur aliquet justo. Morbi rutrum malesuada dui nec vulputate. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed porttitor molestie augue placerat rhoncus. Morbi eu nisl id urna aliquet vestibulum sed semper metus. Suspendisse tempus lorem lacus, non fringilla est sodales at. Maecenas congue facilisis erat, vel vestibulum justo scelerisque sed. Donec vel aliquet ante, a varius purus. Nam tempor pellentesque lorem, eu convallis magna fringilla sit amet.'
+          title: Factory New Audi A4
+          category: cars
+          askingPrice: 20000
+          posted: '2019-08-24T14:15:22Z'
+          deliveryType:
+            shipping: true
+            pickup: true
+          seller:
+            email: testaaja123@test.com
+            phoneNumber: '+358401231231'
+            username: Testaaja123
+          location:
+            city: Oulu
+            country: Finland
+            postalCode: 90550
+            street: Testaajantie 123
+          imageUrls:
+            - www.jikaheimo.software/api/products/1/images/1.png
+      additionalProperties: false
+      properties:
+        id:
+          type: string
+          description: Unique identifier of the post.
+          example: 5099803df3f4948bd2f98391
+          readOnly: true
+        description:
+          type: string
+          description: Description of the post.
+          example: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed vestibulum justo. Pellentesque orci eros, convallis fringilla velit at, consequat volutpat urna. Mauris nec dui sapien. Praesent at mattis urna. Aenean pellentesque placerat vulputate. Aliquam vel orci aliquam magna pretium viverra ullamcorper bibendum metus. Maecenas eu nisl interdum, lacinia ipsum vel, tempus velit. Etiam efficitur aliquet justo. Morbi rutrum malesuada dui nec vulputate. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed porttitor molestie augue placerat rhoncus. Morbi eu nisl id urna aliquet vestibulum sed semper metus. Suspendisse tempus lorem lacus, non fringilla est sodales at. Maecenas congue facilisis erat, vel vestibulum justo scelerisque sed. Donec vel aliquet ante, a varius purus. Nam tempor pellentesque lorem, eu convallis magna fringilla sit amet.'
+        title:
+          type: string
+          description: Short title of the post.
+          example: Factory New Audi A4
+          minLength: 8
+          maxLength: 25
+        category:
+          type: string
+          description: Category of the item being sold
+          example: cars
+          enum:
+            - computers
+            - electronics
+            - cars
+            - pets
+            - food
+            - drinks
+        askingPrice:
+          type: number
+          description: Price of the product
+          minimum: 1
+          maximum: 9999999
+          example: 20000
+        posted:
+          type: string
+          format: date-time
+          description: Server generated datestamp when the post was created.
+          example: '2019-08-24T14:15:22Z'
+          readOnly: true
+        deliveryType:
+          type: object
+          description: Delivery type of sold product
+          required:
+            - shipping
+            - pickup
+          additionalProperties: false
+          properties:
+            shipping:
+              type: boolean
+              description: Is shipping provided as a delivery type.
+            pickup:
+              type: boolean
+              description: Is pickup provided as a delivery type.
+        seller:
+          $ref: '#/components/schemas/SellerProperties'
+        location:
+          $ref: '#/components/schemas/LocationProperties'
+        imageUrls:
+          type: array
+          description: Images of the product being sold.
+          uniqueItems: true
+          maxItems: 4
+          minItems: 0
+          items:
+            type: string
+            example: www.jikaheimo.software/api/products/1/images/1.png
+          readOnly: true
+      required:
+        - description
+        - title
+        - category
+        - askingPrice
+        - deliveryType
+    LocationProperties:
+      type: object
+      title: Location
+      x-examples:
+        default:
+          city: Oulu
+          country: Finland
+          postalCode: '90550'
+          street: Testaajantie 123
+      description: Contains location identifying information to locate an user/post.
+      additionalProperties: false
+      properties:
+        city:
+          type: string
+          description: The city of the location.
+          example: Oulu
+        country:
+          type: string
+          description: The country of the location.
+          example: Finland
+        postalCode:
+          type: string
+          example: '90550'
+          description: The postal code of the location.
+        street:
+          type: string
+          description: The street address of the location.
+          example: Testaajantie 123
+      required:
+        - city
+        - country
+        - postalCode
+        - street
+    LoginProperties:
+      type: object
+      title: Login
+      description: Credentials required to authenticate an user.
+      x-examples:
+        default:
+          username: Testaaja
+          password: testaaja123
+      additionalProperties: false
+      properties:
+        username:
+          type: string
+          description: Username used for authentication.
+          example: Testaaja
+          writeOnly: true
+        password:
+          type: string
+          description: Password used for authentication.
+          format: password
+          example: testaaja123
+          writeOnly: true
+      required:
+        - username
+        - password
+    ErrorMessage:
+      type: object
+      title: ErrorMessage
+      description: Typical message returned when either 4xx or 5xx error occurs.
+      x-examples:
+        '401':
+          message: Unauthorized
+        '403':
+          message: Access forbidden
+        '404':
+          message: Not found
+        5xx:
+          message: 'Something went wrong :('
+        WithDescription:
+          message: 'Something went wrong :('
+          description: More specific description about the error (optional).
+      additionalProperties: false
+      properties:
+        message:
+          type: string
+          description: Message describing the cause of error.
+          example: 'Something went wrong :('
+          readOnly: true
+        description:
+          type: string
+          example: More specific description about the error (optional).
+          readOnly: true
+      required:
+        - message
+      readOnly: true
+    SellerProperties:
+      type: object
+      title: Seller
+      description: Contact information used to identify and react a product seller.
+      x-examples:
+        default:
+          email: akuankka78@test.com
+          phoneNumber: '+358404891231'
+          username: AkuAnkka78
+        Example 2:
+          email: testaaja123@test.com
+          phoneNumber: '+358401231231'
+          username: Testaaja123
+      additionalProperties: false
+      properties:
+        email:
+          type: string
+          description: Email address of the seller.
+          format: email
+          example: testaaja123@test.com
+          readOnly: true
+        phoneNumber:
+          type: string
+          description: Phone number of the seller.
+          example: '+358401231231'
+          readOnly: true
+        username:
+          type: string
+          description: The username of the seller.
+          example: Testaaja123
+          readOnly: true
+      required:
+        - email
+        - phoneNumber
+        - username
+    BearerToken:
+      type: string
+      title: BearerToken
+      description: User authentication token.
+      example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlRlc3RhYWphMzQ1IiwiaWQiOiI2MDMwMTUzYjI0MjIyNjM1NjhlZWJlZjYiLCJpYXQiOjE2MTM3NjM5MTR9.Z1vBx763s23IxDPP7DpRo1KyYkZndOzLcqazDWqdymE
+      x-examples:
+        default: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlRlc3RhYWphMzQ1IiwiaWQiOiI2MDMwMTUzYjI0MjIyNjM1NjhlZWJlZjYiLCJpYXQiOjE2MTM3NjM5MTR9.Z1vBx763s23IxDPP7DpRo1KyYkZndOzLcqazDWqdymE
+  parameters:
+    Bearer:
+      name: Authorization
+      in: header
+      schema:
+        type: string
+        example: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlRlc3RhYWphMzQ1IiwiaWQiOiI2MDMwMTUzYjI0MjIyNjM1NjhlZWJlZjYiLCJpYXQiOjE2MTM3NjM5MTR9.Z1vBx763s23IxDPP7DpRo1KyYkZndOzLcqazDWqdymE
+      description: User specific bearer token.
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        example: 601bbdac90a0dd3538d6ac49
+      description: Unique resource identifier.
+    Offset:
+      name: offset
+      in: query
+      required: false
+      schema:
+        type: string
+  responses:
+    '400':
+      description: 'Typical response for response code 400 (Bad Request). This response can occur if data provided within the request body is in unsupported format, has extra fields or contains invalid data types.'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+          examples:
+            default:
+              value:
+                message: Invalid request body
+    '401':
+      description: Typical response for response code 401 (Unauthorized). User is trying to access a resource which requires authentication and has not been authenticated yet. Also occurs if the user provides invalid login credentials.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+          examples:
+            default:
+              value:
+                message: Unauthorized
+    '403':
+      description: Typical response for response code 403 (Forbidden). Usually occurs when requesting a resource owned/managed by other user.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+          examples:
+            default:
+              value:
+                message: Access Forbidden
+    '404':
+      description: Typical response for response code 404 (Not Found). Typically occurs when requesting a resource with an id that does not exist. Might also occur if the requested path does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+          examples:
+            default:
+              value:
+                message: Not Found
+    '409':
+      description: Typical response for response code 409 (Conflict). Typically occurs when trying to create an user with conflicting login credentials.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+          examples:
+            email:
+              value:
+                message: email already in use
+            username:
+              value:
+                message: username already in use
+    '500':
+      description: Typical response for response code 500 (Internal server error).
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessage'
+          examples:
+            default:
+              value:
+                message: 'Something went wrong :('
+    Posts:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/PostProperties'
+          examples:
+            default:
+              value:
+                - id: 5099803df3f4948bd2f98391
+                  description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed vestibulum justo. Pellentesque orci eros, convallis fringilla velit at, consequat volutpat urna. Mauris nec dui sapien. Praesent at mattis urna. Aenean pellentesque placerat vulputate. Aliquam vel orci aliquam magna pretium viverra ullamcorper bibendum metus. Maecenas eu nisl interdum, lacinia ipsum vel, tempus velit. Etiam efficitur aliquet justo. Morbi rutrum malesuada dui nec vulputate. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed porttitor molestie augue placerat rhoncus. Morbi eu nisl id urna aliquet vestibulum sed semper metus. Suspendisse tempus lorem lacus, non fringilla est sodales at. Maecenas congue facilisis erat, vel vestibulum justo scelerisque sed. Donec vel aliquet ante, a varius purus. Nam tempor pellentesque lorem, eu convallis magna fringilla sit amet.'
+                  title: Factory New Audi A4
+                  category: cars
+                  askingPrice: 20000
+                  posted: '2019-08-24T14:15:22Z'
+                  deliveryType:
+                    shipping: true
+                    pickup: true
+                  seller:
+                    email: testaaja123@test.com
+                    phoneNumber: '+358401231231'
+                    username: Testaaja123
+                  location:
+                    city: Oulu
+                    country: Finland
+                    postalCode: '90550'
+                    street: Testaajantie 123
+                  imageUrls:
+                    - www.jikaheimo.software/api/products/1/images/1.png
+        application/xml:
+          schema:
+            type: object
+            properties: {}
+        multipart/form-data:
+          schema:
+            type: object
+            properties: {}
+      headers: {}
+    Post:
+      description: Example response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/PostProperties'
+          examples:
+            default:
+              value:
+                id: 5099803df3f4948bd2f98391
+                description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed vestibulum justo. Pellentesque orci eros, convallis fringilla velit at, consequat volutpat urna. Mauris nec dui sapien. Praesent at mattis urna. Aenean pellentesque placerat vulputate. Aliquam vel orci aliquam magna pretium viverra ullamcorper bibendum metus. Maecenas eu nisl interdum, lacinia ipsum vel, tempus velit. Etiam efficitur aliquet justo. Morbi rutrum malesuada dui nec vulputate. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed porttitor molestie augue placerat rhoncus. Morbi eu nisl id urna aliquet vestibulum sed semper metus. Suspendisse tempus lorem lacus, non fringilla est sodales at. Maecenas congue facilisis erat, vel vestibulum justo scelerisque sed. Donec vel aliquet ante, a varius purus. Nam tempor pellentesque lorem, eu convallis magna fringilla sit amet.'
+                title: Factory New Audi A4
+                category: cars
+                askingPrice: 20000
+                posted: '2019-08-24T14:15:22Z'
+                deliveryType:
+                  shipping: true
+                  pickup: true
+                seller:
+                  email: testaaja123@test.com
+                  phoneNumber: '+358401231231'
+                  username: Testaaja123
+                location:
+                  city: Oulu
+                  country: Finland
+                  postalCode: '90550'
+                  street: Testaajantie 123
+                imageUrls:
+                  - www.jikaheimo.software/api/products/1/images/1.png
+    Images:
+      description: Response that returns a list of image URLs.
+      content:
+        application/json:
+          schema:
+            type: array
+            description: Array of image URLs.
+            items:
+              type: string
+              example: '[   "http://localhost:3000/api/images/3312576856487e155c5e899f0b1e6f53.png",   "http://localhost:3000/api/images/63964099b464e9305c917d9758858c37.png",   "http://localhost:3000/api/images/81abc0411cca45be2d060f0b9e635589.png",   "http://localhost:3000/api/images/fd8854bf3b964e5711fa4eb93794f3b9.png" ]'
+          examples:
+            default:
+              value:
+                - 'http://localhost:3000/api/images/3312576856487e155c5e899f0b1e6f53.png'
+                - 'http://localhost:3000/api/images/63964099b464e9305c917d9758858c37.png'
+                - 'http://localhost:3000/api/images/81abc0411cca45be2d060f0b9e635589.png'
+                - 'http://localhost:3000/api/images/fd8854bf3b964e5711fa4eb93794f3b9.png'
+  securitySchemes:
+    JSONWebToken:
+      type: http
+      scheme: bearer
+      description: JSON webtoken bearer authentication
+  examples: {}
