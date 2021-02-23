@@ -21,8 +21,7 @@ imagesRouter.get('/', async (req, res) => {
 });
 
 // [GET] Returns an image resource with the specified name.
-imagesRouter.get('/:imageName', (req, res, next) => {
-  const imageName = req.params.imageName;
+imagesRouter.get('/:imageName', ({ params: { imageName } }, res, next) => {
   res.sendFile(path.join(IMAGES_PATH, imageName), { root: '.' }, () =>
     next(notFoundError())
   );

@@ -1,6 +1,6 @@
-POST http://localhost:3000/api/posts/6035249a11aa9c4990494cec/upload
+POST http://jikaheimo.software:3000/api/posts/60353e4a02648c296a053f9b/upload
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImphYWtvbnRlc3RhdXMiLCJpZCI6IjYwMzUyNDI2MTFhYTljNDk5MDQ5NGNlYiIsImlhdCI6MTYxNDA5NjMyOX0.rRDtgK1wPOJK1Veunj2_OfuVe6ULJSm_KA4onzLeHrU
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImphYWtvbnRlc3RhdXMiLCJpZCI6IjYwMzUzZTA5MDI2NDhjMjk2YTA1M2Y5YSIsImlhdCI6MTYxNDEwMjE0NH0.IQ-vOHpmlhh3vAdf1L6MMfMGaZZBGJyKBfTQmFg_dWU
 
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
 Content-Disposition: form-data; name="fileName"; filename="../app/tests/1.png"

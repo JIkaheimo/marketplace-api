@@ -1,19 +1,19 @@
 
 
 ### CREATE VALID USER
-POST http://localhost:3000/api/users HTTP/1.1
+POST http://jikaheimo.software:3000/api/users HTTP/1.1
 Content-Type: application/json
 
 {
   "email": "jaakontestaus123@testaaja.com",
   "username": "jaakontestaus",
   "address": {
-    "city": "Oulu",
+    "city": "Kemi",
     "country": "Finland",
     "postalCode": "90550",
     "street": "Testaajantie 123"
   },
-  "phoneNumber": "+358401231231",
+  "phoneNumber": "+123123123",
   "birthDate": "1994-08-05",
   "password": "jaakontestaus"
 }

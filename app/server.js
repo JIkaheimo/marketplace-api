@@ -11,6 +11,7 @@ import cors from 'cors';
 import { mware, db } from './utils/index.js';
 import * as routes from './controllers/index.js';
 import {
+  API_ROOT,
   IMAGES_PATH,
   LOGIN_PATH,
   POSTS_PATH,
@@ -38,6 +39,9 @@ app.use(mware.pathProvider);
 process.env.NODE_ENV !== 'test' ? app.use(morgan('tiny')) : null;
 
 // Add diggerent API routes.
+app.get(API_ROOT, (req, res) =>
+  res.json({ message: 'This is API root path.' })
+);
 app.use(POSTS_PATH, routes.posts);
 app.use(LOGIN_PATH, routes.login);
 app.use(USERS_PATH, routes.users);

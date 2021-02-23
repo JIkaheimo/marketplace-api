@@ -19,6 +19,7 @@ import {
   badRequestError,
   forbiddenError,
   notFoundError,
+  unauthorizedError,
 } from '../utils/errors.js';
 import { IMAGES_PATH } from '../utils/config.js';
 import { validatePost } from '../utils/middleware.js';
@@ -103,7 +104,7 @@ postsRouter.get(
 postsRouter.post(
   '/',
   [auth.authenticate, validatePost], // Make sure the user is authenticated.
-  async ({ userId, parsed: postInfo }, res) => {
+  async ({ userId, parsed: postInfo }, res, next) => {
     // Find the user creating a new post.
     const user = await User.findById(userId);
     // Create a new post.
@@ -164,8 +165,9 @@ postsRouter.post(
 
     // Map image names to the corresponding paths.
     const imageUrls = imageNames.map(
-      imageName => `${hostPath}/api/images/${imageName.split('\\')[1]}`
+      imageName => `${hostPath}/api/${imageName}`
     );
+
     // Rename files.
     const renamePromises = files.map(file =>
       fs.rename(file.path, `${file.path}.${file.mimetype.split('/')[1]}`)
