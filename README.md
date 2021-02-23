@@ -4,7 +4,7 @@
 
 [**API ROOT**](http://www.jikaheimo.software:3000/api) - All the documented paths are relative to this.
 
-[**API_DOCS**](http://www.jikaheimo.sofware:3000/docs) - The actual documentation.
+[**API_DOCS**](http://www.jikaheimo.software:3000/docs) - The actual documentation.
 
 ### TO RUN
 
