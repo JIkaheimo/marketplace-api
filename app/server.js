@@ -1,17 +1,23 @@
 //@ts-check
 
+// Third-party modules.
 import { default as express } from 'express';
 import bodyParser from 'body-parser';
 import _ from 'express-async-errors';
 import morgan from 'morgan';
+import cors from 'cors';
 
+// In-house modules.
 import { mware, db } from './utils/index.js';
 import * as routes from './controllers/index.js';
 
 const app = express();
 
+// Add cross-origin support.
+app.use(cors());
+
 // Serve HTML files from public folder.
-app.use(express.static('public'));
+app.use(express.static('public', { extensions: ['html'] }));
 
 // Add JSON bodyparsing.
 app.use(bodyParser.json());

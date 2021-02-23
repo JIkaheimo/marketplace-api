@@ -754,18 +754,19 @@
   "properties" : {
     "message" : {
       "type" : "string",
-      "description" : "Message describing the cause of error.",
+      "description" : "Simple message describing the cause of the error.",
       "readOnly" : true,
       "example" : "Something went wrong :("
     },
-    "description" : {
+    "detail" : {
       "type" : "string",
+      "description" : "More specific description about the error.",
       "readOnly" : true,
       "example" : "More specific description about the error (optional)."
     }
   },
   "additionalProperties" : false,
-  "description" : "Typical message returned when either 4xx or 5xx error occurs.",
+  "description" : "Typical respone body returned when either 4xx or 5xx error occurs.",
   "readOnly" : true,
   "x-examples" : {
     "401" : {
@@ -938,7 +939,7 @@
       "readOnly" : true,
       "items" : {
         "type" : "string",
-        "example" : "www.jikaheimo.software/api/products/1/images/1.png"
+        "example" : "http://www.jikaheimo.software/api/images/1asdasdasd.png"
       }
     }
   },
@@ -967,7 +968,7 @@
         "postalCode" : 90550,
         "street" : "Testaajantie 123"
       },
-      "imageUrls" : [ "www.jikaheimo.software/api/products/1/images/1.png" ]
+      "imageUrls" : [ "http://www.jikaheimo.software/api/images/asfjiasfpajpo.png" ]
     }
   }
 };
@@ -1175,10 +1176,11 @@
               <div class="app-desc">Version: 1.0</div>
             <hr>
             <div><p>Simple API developed to serve as a platform for selling and buying used items. As an example of this in Finland would be tori.fi or globally ebay.com</p>
-<p>Related Course
+<p><strong>Related Course:</strong>
 Building Cloud Integration, spring 2021</p>
-<p>Design and Development: Jaakko Ikäheimo, Konsta Holm</p>
-<p>This API implements the following functional requirements:</p>
+<p><strong>Design and Development:</strong>
+Jaakko Ikäheimo, Konsta Holm</p>
+<h3>This API implements the following functional requirements:</h3>
 <ul>
 <li>User registration and login.</li>
 <li>Post creation for authenticated users.</li>
@@ -1203,10 +1205,14 @@ Building Cloud Integration, spring 2021</p>
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Creates a new post. To create a new post user must be authenticated.</p>
+                        <p class="marked">### Create a post
+
+Creates a new post. To create a new post user must be authenticated. Also the user has to provide ALL the required post information in correct format to be able to create a new post.
+
+Posts uses JSON webtoken to identify the user creating a new post and fills the seller and location information based on the user information.</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/api/posts</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/posts</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
@@ -1259,7 +1265,7 @@ public class DefaultApiExample {
       "pickup" : true
     }
   }
-}; // PostProperties | Required data in correct format to create a new post.
+}; // PostProperties | Required data in correct format to create a new post. 
         String authorization = authorization_example; // String | User specific bearer token.
         try {
             PostProperties result = apiInstance.createPost(body, authorization);
@@ -1290,7 +1296,7 @@ public class DefaultApiExample {
       "pickup" : true
     }
   }
-}; // PostProperties | Required data in correct format to create a new post.
+}; // PostProperties | Required data in correct format to create a new post. 
         String authorization = authorization_example; // String | User specific bearer token.
         try {
             PostProperties result = apiInstance.createPost(body, authorization);
@@ -1319,7 +1325,7 @@ PostProperties *body = {
       "pickup" : true
     }
   }
-}; // Required data in correct format to create a new post. (optional)
+}; // Required data in correct format to create a new post.  (optional)
 String *authorization = authorization_example; // User specific bearer token. (optional)
 
 DefaultApi *apiInstance = [[DefaultApi alloc] init];
@@ -1356,7 +1362,7 @@ var opts = {
       "pickup" : true
     }
   }
-} // {{PostProperties}} Required data in correct format to create a new post.
+} // {{PostProperties}} Required data in correct format to create a new post. 
   'authorization': authorization_example // {{String}} User specific bearer token.
 };
 var callback = function(error, data, response) {
@@ -1389,7 +1395,7 @@ namespace Example
 
 
             var apiInstance = new DefaultApi();
-            var body = new PostProperties(); // PostProperties | Required data in correct format to create a new post. (optional) 
+            var body = new PostProperties(); // PostProperties | Required data in correct format to create a new post.  (optional) 
             var authorization = authorization_example;  // String | User specific bearer token. (optional) 
 
             try
@@ -1425,7 +1431,7 @@ $body = {
       "pickup" : true
     }
   }
-}; // PostProperties | Required data in correct format to create a new post.
+}; // PostProperties | Required data in correct format to create a new post. 
 $authorization = authorization_example; // String | User specific bearer token.
 
 try {
@@ -1444,7 +1450,7 @@ use WWW::SwaggerClient::DefaultApi;
 
 
 my $api_instance = WWW::SwaggerClient::DefaultApi->new();
-my $body = WWW::SwaggerClient::Object::PostProperties->new(); # PostProperties | Required data in correct format to create a new post.
+my $body = WWW::SwaggerClient::Object::PostProperties->new(); # PostProperties | Required data in correct format to create a new post. 
 my $authorization = authorization_example; # String | User specific bearer token.
 
 eval { 
@@ -1477,7 +1483,7 @@ body = {
       "pickup" : true
     }
   }
-} # PostProperties | Required data in correct format to create a new post. (optional)
+} # PostProperties | Required data in correct format to create a new post.  (optional)
 authorization = authorization_example # String | User specific bearer token. (optional)
 
 try: 
@@ -1532,7 +1538,7 @@ except ApiException as e:
                                 <script>
                                 $(document).ready(function() {
                                   var schemaWrapper = {
-  "description" : "Required data in correct format to create a new post.",
+  "description" : "Required data in correct format to create a new post. ",
   "content" : {
     "application/json" : {
       "schema" : {
@@ -1857,10 +1863,14 @@ except ApiException as e:
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Deletes a post with the given id. To delete a post the user has to be authenticated and authorized.</p>
+                        <p class="marked">### Delete a post
+
+Deletes a post with the given id. To delete a post the user has to be authenticated and authorized.
+
+*This like every identifier based resource path might return 404 for invalid id type aswell.*</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="delete"><code><span class="pln">/api/posts/{id}</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="delete"><code><span class="pln">/posts/{id}</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
@@ -2455,10 +2465,15 @@ except ApiException as e:
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Returns an image with the specified name/identifier.</p>
+                        <p class="marked">### Fetch image
+
+Returns an image in image format with the specified name/identifier.
+
+*This like every identifier based resource path might return 404 for invalid id type aswell*
+</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/api/images/{name}</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/images/{name}</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
@@ -2886,10 +2901,13 @@ except ApiException as e:
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Returns path of every stored post image.</p>
+                        <p class="marked">### Fetch images
+
+Returns path of every stored post image in the server. Does not use any kind of restrictions because it only provides a string array...
+.</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/api/images</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/images</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
@@ -3084,7 +3102,7 @@ except ApiException as e:
 
 
                           <h2>Responses</h2>
-                            <h3> Status: 200 - OK </h3>
+                            <h3> Status: 200 - List of image paths available on server. </h3>
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
@@ -3102,7 +3120,7 @@ except ApiException as e:
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
-  "description" : "OK",
+  "description" : "List of image paths available on server.",
   "content" : {
     "application/json" : {
       "schema" : {
@@ -3114,8 +3132,8 @@ except ApiException as e:
         "x-content-type" : "application/json"
       },
       "examples" : {
-        "example-1" : {
-          "value" : [ "string" ]
+        "default" : {
+          "value" : [ "http://jikaheimo.software:3000/api/images/192iafsapsfiapsf9.jpg", "http://jikaheimo.software:3000/api/images/asdasd322332apsf9.png" ]
         }
       }
     }
@@ -3144,7 +3162,7 @@ except ApiException as e:
                                   <input id='responses-displayImages-200-schema-data' type='hidden' value=''></input>
                                 </div>
                                   <div class="tab-pane" id="responses-displayImages-200-example-0">
-                                      <pre class="prettyprint"><code class="json">[&quot;string&quot;]</code></pre>
+                                      <pre class="prettyprint"><code class="json">[&quot;http://jikaheimo.software:3000/api/images/192iafsapsfiapsf9.jpg&quot;,&quot;http://jikaheimo.software:3000/api/images/asdasd322332apsf9.png&quot;]</code></pre>
                                 </div>
                             </div>
 
@@ -3221,10 +3239,15 @@ except ApiException as e:
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Displays/fetches a post with the given id.</p>
+                        <p class="marked">### Fetch a post
+
+Displays/fetches a post with the given id.
+
+*This like every identifier based resource path might return 404 for invalid id type aswell.*
+</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/api/posts/{id}</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/posts/{id}</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
@@ -3482,7 +3505,7 @@ except ApiException as e:
         "$ref" : "#/components/schemas/PostProperties"
       },
       "examples" : {
-        "basic" : {
+        "default" : {
           "value" : {
             "id" : "5099803df3f4948bd2f98391",
             "description" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed vestibulum justo. Pellentesque orci eros, convallis fringilla velit at, consequat volutpat urna. Mauris nec dui sapien. Praesent at mattis urna. Aenean pellentesque placerat vulputate. Aliquam vel orci aliquam magna pretium viverra ullamcorper bibendum metus. Maecenas eu nisl interdum, lacinia ipsum vel, tempus velit. Etiam efficitur aliquet justo. Morbi rutrum malesuada dui nec vulputate. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed porttitor molestie augue placerat rhoncus. Morbi eu nisl id urna aliquet vestibulum sed semper metus. Suspendisse tempus lorem lacus, non fringilla est sodales at. Maecenas congue facilisis erat, vel vestibulum justo scelerisque sed. Donec vel aliquet ante, a varius purus. Nam tempor pellentesque lorem, eu convallis magna fringilla sit amet.",
@@ -3505,7 +3528,7 @@ except ApiException as e:
               "postalCode" : "90550",
               "street" : "Testaajantie 123"
             },
-            "imageUrls" : [ "www.jikaheimo.software/api/products/1/images/1.png" ]
+            "imageUrls" : [ "http://www.jikaheimo.software/api/images/1asdasdasd.png" ]
           }
         }
       }
@@ -3535,7 +3558,7 @@ except ApiException as e:
                                   <input id='responses-displayPost-200-schema-data' type='hidden' value=''></input>
                                 </div>
                                   <div class="tab-pane" id="responses-displayPost-200-example-0">
-                                      <pre class="prettyprint"><code class="json">{&quot;id&quot;:&quot;5099803df3f4948bd2f98391&quot;,&quot;description&quot;:&quot;Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed vestibulum justo. Pellentesque orci eros, convallis fringilla velit at, consequat volutpat urna. Mauris nec dui sapien. Praesent at mattis urna. Aenean pellentesque placerat vulputate. Aliquam vel orci aliquam magna pretium viverra ullamcorper bibendum metus. Maecenas eu nisl interdum, lacinia ipsum vel, tempus velit. Etiam efficitur aliquet justo. Morbi rutrum malesuada dui nec vulputate. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed porttitor molestie augue placerat rhoncus. Morbi eu nisl id urna aliquet vestibulum sed semper metus. Suspendisse tempus lorem lacus, non fringilla est sodales at. Maecenas congue facilisis erat, vel vestibulum justo scelerisque sed. Donec vel aliquet ante, a varius purus. Nam tempor pellentesque lorem, eu convallis magna fringilla sit amet.&quot;,&quot;title&quot;:&quot;Factory New Audi A4&quot;,&quot;category&quot;:&quot;cars&quot;,&quot;askingPrice&quot;:20000,&quot;posted&quot;:&quot;2019-08-24T14:15:22Z&quot;,&quot;deliveryType&quot;:{&quot;shipping&quot;:true,&quot;pickup&quot;:true},&quot;seller&quot;:{&quot;email&quot;:&quot;testaaja123@test.com&quot;,&quot;phoneNumber&quot;:&quot;+358401231231&quot;,&quot;username&quot;:&quot;Testaaja123&quot;},&quot;location&quot;:{&quot;city&quot;:&quot;Oulu&quot;,&quot;country&quot;:&quot;Finland&quot;,&quot;postalCode&quot;:&quot;90550&quot;,&quot;street&quot;:&quot;Testaajantie 123&quot;},&quot;imageUrls&quot;:[&quot;www.jikaheimo.software/api/products/1/images/1.png&quot;]}</code></pre>
+                                      <pre class="prettyprint"><code class="json">{&quot;id&quot;:&quot;5099803df3f4948bd2f98391&quot;,&quot;description&quot;:&quot;Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed vestibulum justo. Pellentesque orci eros, convallis fringilla velit at, consequat volutpat urna. Mauris nec dui sapien. Praesent at mattis urna. Aenean pellentesque placerat vulputate. Aliquam vel orci aliquam magna pretium viverra ullamcorper bibendum metus. Maecenas eu nisl interdum, lacinia ipsum vel, tempus velit. Etiam efficitur aliquet justo. Morbi rutrum malesuada dui nec vulputate. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed porttitor molestie augue placerat rhoncus. Morbi eu nisl id urna aliquet vestibulum sed semper metus. Suspendisse tempus lorem lacus, non fringilla est sodales at. Maecenas congue facilisis erat, vel vestibulum justo scelerisque sed. Donec vel aliquet ante, a varius purus. Nam tempor pellentesque lorem, eu convallis magna fringilla sit amet.&quot;,&quot;title&quot;:&quot;Factory New Audi A4&quot;,&quot;category&quot;:&quot;cars&quot;,&quot;askingPrice&quot;:20000,&quot;posted&quot;:&quot;2019-08-24T14:15:22Z&quot;,&quot;deliveryType&quot;:{&quot;shipping&quot;:true,&quot;pickup&quot;:true},&quot;seller&quot;:{&quot;email&quot;:&quot;testaaja123@test.com&quot;,&quot;phoneNumber&quot;:&quot;+358401231231&quot;,&quot;username&quot;:&quot;Testaaja123&quot;},&quot;location&quot;:{&quot;city&quot;:&quot;Oulu&quot;,&quot;country&quot;:&quot;Finland&quot;,&quot;postalCode&quot;:&quot;90550&quot;,&quot;street&quot;:&quot;Testaajantie 123&quot;},&quot;imageUrls&quot;:[&quot;http://www.jikaheimo.software/api/images/1asdasdasd.png&quot;]}</code></pre>
                                 </div>
                             </div>
 
@@ -3673,10 +3696,12 @@ except ApiException as e:
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Fetches and displays posts. By default uses paging where the limit is 20 and offset 0.</p>
+                        <p class="marked">### Fetch posts
+
+Fetches and displays posts. By default returns posts with limit of 20 and offset of 0. Will send back an error if the specified limit or offset is out of boundaries.</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/api/posts</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="get"><code><span class="pln">/posts</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
@@ -3965,7 +3990,7 @@ except ApiException as e:
         "x-content-type" : "application/json"
       },
       "examples" : {
-        "basic" : {
+        "default" : {
           "value" : [ {
             "id" : "5099803df3f4948bd2f98391",
             "description" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed vestibulum justo. Pellentesque orci eros, convallis fringilla velit at, consequat volutpat urna. Mauris nec dui sapien. Praesent at mattis urna. Aenean pellentesque placerat vulputate. Aliquam vel orci aliquam magna pretium viverra ullamcorper bibendum metus. Maecenas eu nisl interdum, lacinia ipsum vel, tempus velit. Etiam efficitur aliquet justo. Morbi rutrum malesuada dui nec vulputate. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed porttitor molestie augue placerat rhoncus. Morbi eu nisl id urna aliquet vestibulum sed semper metus. Suspendisse tempus lorem lacus, non fringilla est sodales at. Maecenas congue facilisis erat, vel vestibulum justo scelerisque sed. Donec vel aliquet ante, a varius purus. Nam tempor pellentesque lorem, eu convallis magna fringilla sit amet.",
@@ -3988,7 +4013,7 @@ except ApiException as e:
               "postalCode" : "90550",
               "street" : "Testaajantie 123"
             },
-            "imageUrls" : [ "www.jikaheimo.software/api/products/1/images/1.png" ]
+            "imageUrls" : [ "http://www.jikaheimo.software/api/images/1asdasdasd.png" ]
           } ]
         }
       }
@@ -4018,7 +4043,7 @@ except ApiException as e:
                                   <input id='responses-displayPosts-200-schema-data' type='hidden' value=''></input>
                                 </div>
                                   <div class="tab-pane" id="responses-displayPosts-200-example-0">
-                                      <pre class="prettyprint"><code class="json">[{&quot;id&quot;:&quot;5099803df3f4948bd2f98391&quot;,&quot;description&quot;:&quot;Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed vestibulum justo. Pellentesque orci eros, convallis fringilla velit at, consequat volutpat urna. Mauris nec dui sapien. Praesent at mattis urna. Aenean pellentesque placerat vulputate. Aliquam vel orci aliquam magna pretium viverra ullamcorper bibendum metus. Maecenas eu nisl interdum, lacinia ipsum vel, tempus velit. Etiam efficitur aliquet justo. Morbi rutrum malesuada dui nec vulputate. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed porttitor molestie augue placerat rhoncus. Morbi eu nisl id urna aliquet vestibulum sed semper metus. Suspendisse tempus lorem lacus, non fringilla est sodales at. Maecenas congue facilisis erat, vel vestibulum justo scelerisque sed. Donec vel aliquet ante, a varius purus. Nam tempor pellentesque lorem, eu convallis magna fringilla sit amet.&quot;,&quot;title&quot;:&quot;Factory New Audi A4&quot;,&quot;category&quot;:&quot;cars&quot;,&quot;askingPrice&quot;:20000,&quot;posted&quot;:&quot;2019-08-24T14:15:22Z&quot;,&quot;deliveryType&quot;:{&quot;shipping&quot;:true,&quot;pickup&quot;:true},&quot;seller&quot;:{&quot;email&quot;:&quot;testaaja123@test.com&quot;,&quot;phoneNumber&quot;:&quot;+358401231231&quot;,&quot;username&quot;:&quot;Testaaja123&quot;},&quot;location&quot;:{&quot;city&quot;:&quot;Oulu&quot;,&quot;country&quot;:&quot;Finland&quot;,&quot;postalCode&quot;:&quot;90550&quot;,&quot;street&quot;:&quot;Testaajantie 123&quot;},&quot;imageUrls&quot;:[&quot;www.jikaheimo.software/api/products/1/images/1.png&quot;]}]</code></pre>
+                                      <pre class="prettyprint"><code class="json">[{&quot;id&quot;:&quot;5099803df3f4948bd2f98391&quot;,&quot;description&quot;:&quot;Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed vestibulum justo. Pellentesque orci eros, convallis fringilla velit at, consequat volutpat urna. Mauris nec dui sapien. Praesent at mattis urna. Aenean pellentesque placerat vulputate. Aliquam vel orci aliquam magna pretium viverra ullamcorper bibendum metus. Maecenas eu nisl interdum, lacinia ipsum vel, tempus velit. Etiam efficitur aliquet justo. Morbi rutrum malesuada dui nec vulputate. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed porttitor molestie augue placerat rhoncus. Morbi eu nisl id urna aliquet vestibulum sed semper metus. Suspendisse tempus lorem lacus, non fringilla est sodales at. Maecenas congue facilisis erat, vel vestibulum justo scelerisque sed. Donec vel aliquet ante, a varius purus. Nam tempor pellentesque lorem, eu convallis magna fringilla sit amet.&quot;,&quot;title&quot;:&quot;Factory New Audi A4&quot;,&quot;category&quot;:&quot;cars&quot;,&quot;askingPrice&quot;:20000,&quot;posted&quot;:&quot;2019-08-24T14:15:22Z&quot;,&quot;deliveryType&quot;:{&quot;shipping&quot;:true,&quot;pickup&quot;:true},&quot;seller&quot;:{&quot;email&quot;:&quot;testaaja123@test.com&quot;,&quot;phoneNumber&quot;:&quot;+358401231231&quot;,&quot;username&quot;:&quot;Testaaja123&quot;},&quot;location&quot;:{&quot;city&quot;:&quot;Oulu&quot;,&quot;country&quot;:&quot;Finland&quot;,&quot;postalCode&quot;:&quot;90550&quot;,&quot;street&quot;:&quot;Testaajantie 123&quot;},&quot;imageUrls&quot;:[&quot;http://www.jikaheimo.software/api/images/1asdasdasd.png&quot;]}]</code></pre>
                                 </div>
                             </div>
 
@@ -4095,10 +4120,14 @@ except ApiException as e:
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Authenticates the user to use some Marketplace functionalities. Returns the user related information and bearer token on successful request.</p>
+                        <p class="marked">### Login/Authenticate
+
+Authenticates the user to use some Marketplace functionalities. The user must provide the username and password as strings.
+
+After successful login, the response body will allow the user to see his/her information and it also provides a fresh JSON web token.</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/api/login</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/login</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
@@ -4661,10 +4690,14 @@ except ApiException as e:
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Modifies a post with the given id. To modify a post user has to be authenticated and authorized.</p>
+                        <p class="marked">### Modify a post.
+
+Modifies a post with the given id. To modify a post user has to be authenticated and authorized. Also the request body must contain ALL the required fields or otherwise the request is treated as bad.
+
+*This like every identifier based resource path might return 404 for invalid id type aswell.*</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="put"><code><span class="pln">/api/posts/{id}</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="put"><code><span class="pln">/posts/{id}</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
@@ -4709,14 +4742,28 @@ public class DefaultApiExample {
         String id = id_example; // String | Unique resource identifier.
         PostProperties body = {
   "value" : {
+    "id" : "5099803df3f4948bd2f98391",
     "description" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed vestibulum justo. Pellentesque orci eros, convallis fringilla velit at, consequat volutpat urna. Mauris nec dui sapien. Praesent at mattis urna. Aenean pellentesque placerat vulputate. Aliquam vel orci aliquam magna pretium viverra ullamcorper bibendum metus. Maecenas eu nisl interdum, lacinia ipsum vel, tempus velit. Etiam efficitur aliquet justo. Morbi rutrum malesuada dui nec vulputate. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed porttitor molestie augue placerat rhoncus. Morbi eu nisl id urna aliquet vestibulum sed semper metus. Suspendisse tempus lorem lacus, non fringilla est sodales at. Maecenas congue facilisis erat, vel vestibulum justo scelerisque sed. Donec vel aliquet ante, a varius purus. Nam tempor pellentesque lorem, eu convallis magna fringilla sit amet.",
     "title" : "Factory New Audi A4",
     "category" : "cars",
     "askingPrice" : 20000,
+    "posted" : "2019-08-24T14:15:22Z",
     "deliveryType" : {
       "shipping" : true,
       "pickup" : true
-    }
+    },
+    "seller" : {
+      "email" : "testaaja123@test.com",
+      "phoneNumber" : "+358401231231",
+      "username" : "Testaaja123"
+    },
+    "location" : {
+      "city" : "Oulu",
+      "country" : "Finland",
+      "postalCode" : "90550",
+      "street" : "Testaajantie 123"
+    },
+    "imageUrls" : [ "http://www.jikaheimo.software/api/images/1asdasdasd.png" ]
   }
 }; // PostProperties | Required data in correct format to modify a post.
         String authorization = authorization_example; // String | User specific bearer token.
@@ -4741,14 +4788,28 @@ public class DefaultApiExample {
         String id = id_example; // String | Unique resource identifier.
         PostProperties body = {
   "value" : {
+    "id" : "5099803df3f4948bd2f98391",
     "description" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed vestibulum justo. Pellentesque orci eros, convallis fringilla velit at, consequat volutpat urna. Mauris nec dui sapien. Praesent at mattis urna. Aenean pellentesque placerat vulputate. Aliquam vel orci aliquam magna pretium viverra ullamcorper bibendum metus. Maecenas eu nisl interdum, lacinia ipsum vel, tempus velit. Etiam efficitur aliquet justo. Morbi rutrum malesuada dui nec vulputate. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed porttitor molestie augue placerat rhoncus. Morbi eu nisl id urna aliquet vestibulum sed semper metus. Suspendisse tempus lorem lacus, non fringilla est sodales at. Maecenas congue facilisis erat, vel vestibulum justo scelerisque sed. Donec vel aliquet ante, a varius purus. Nam tempor pellentesque lorem, eu convallis magna fringilla sit amet.",
     "title" : "Factory New Audi A4",
     "category" : "cars",
     "askingPrice" : 20000,
+    "posted" : "2019-08-24T14:15:22Z",
     "deliveryType" : {
       "shipping" : true,
       "pickup" : true
-    }
+    },
+    "seller" : {
+      "email" : "testaaja123@test.com",
+      "phoneNumber" : "+358401231231",
+      "username" : "Testaaja123"
+    },
+    "location" : {
+      "city" : "Oulu",
+      "country" : "Finland",
+      "postalCode" : "90550",
+      "street" : "Testaajantie 123"
+    },
+    "imageUrls" : [ "http://www.jikaheimo.software/api/images/1asdasdasd.png" ]
   }
 }; // PostProperties | Required data in correct format to modify a post.
         String authorization = authorization_example; // String | User specific bearer token.
@@ -4771,14 +4832,28 @@ public class DefaultApiExample {
 String *id = id_example; // Unique resource identifier.
 PostProperties *body = {
   "value" : {
+    "id" : "5099803df3f4948bd2f98391",
     "description" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed vestibulum justo. Pellentesque orci eros, convallis fringilla velit at, consequat volutpat urna. Mauris nec dui sapien. Praesent at mattis urna. Aenean pellentesque placerat vulputate. Aliquam vel orci aliquam magna pretium viverra ullamcorper bibendum metus. Maecenas eu nisl interdum, lacinia ipsum vel, tempus velit. Etiam efficitur aliquet justo. Morbi rutrum malesuada dui nec vulputate. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed porttitor molestie augue placerat rhoncus. Morbi eu nisl id urna aliquet vestibulum sed semper metus. Suspendisse tempus lorem lacus, non fringilla est sodales at. Maecenas congue facilisis erat, vel vestibulum justo scelerisque sed. Donec vel aliquet ante, a varius purus. Nam tempor pellentesque lorem, eu convallis magna fringilla sit amet.",
     "title" : "Factory New Audi A4",
     "category" : "cars",
     "askingPrice" : 20000,
+    "posted" : "2019-08-24T14:15:22Z",
     "deliveryType" : {
       "shipping" : true,
       "pickup" : true
-    }
+    },
+    "seller" : {
+      "email" : "testaaja123@test.com",
+      "phoneNumber" : "+358401231231",
+      "username" : "Testaaja123"
+    },
+    "location" : {
+      "city" : "Oulu",
+      "country" : "Finland",
+      "postalCode" : "90550",
+      "street" : "Testaajantie 123"
+    },
+    "imageUrls" : [ "http://www.jikaheimo.software/api/images/1asdasdasd.png" ]
   }
 }; // Required data in correct format to modify a post. (optional)
 String *authorization = authorization_example; // User specific bearer token. (optional)
@@ -4810,14 +4885,28 @@ var id = id_example; // {{String}} Unique resource identifier.
 var opts = { 
   'body': {
   "value" : {
+    "id" : "5099803df3f4948bd2f98391",
     "description" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed vestibulum justo. Pellentesque orci eros, convallis fringilla velit at, consequat volutpat urna. Mauris nec dui sapien. Praesent at mattis urna. Aenean pellentesque placerat vulputate. Aliquam vel orci aliquam magna pretium viverra ullamcorper bibendum metus. Maecenas eu nisl interdum, lacinia ipsum vel, tempus velit. Etiam efficitur aliquet justo. Morbi rutrum malesuada dui nec vulputate. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed porttitor molestie augue placerat rhoncus. Morbi eu nisl id urna aliquet vestibulum sed semper metus. Suspendisse tempus lorem lacus, non fringilla est sodales at. Maecenas congue facilisis erat, vel vestibulum justo scelerisque sed. Donec vel aliquet ante, a varius purus. Nam tempor pellentesque lorem, eu convallis magna fringilla sit amet.",
     "title" : "Factory New Audi A4",
     "category" : "cars",
     "askingPrice" : 20000,
+    "posted" : "2019-08-24T14:15:22Z",
     "deliveryType" : {
       "shipping" : true,
       "pickup" : true
-    }
+    },
+    "seller" : {
+      "email" : "testaaja123@test.com",
+      "phoneNumber" : "+358401231231",
+      "username" : "Testaaja123"
+    },
+    "location" : {
+      "city" : "Oulu",
+      "country" : "Finland",
+      "postalCode" : "90550",
+      "street" : "Testaajantie 123"
+    },
+    "imageUrls" : [ "http://www.jikaheimo.software/api/images/1asdasdasd.png" ]
   }
 } // {{PostProperties}} Required data in correct format to modify a post.
   'authorization': authorization_example // {{String}} User specific bearer token.
@@ -4881,14 +4970,28 @@ $api_instance = new Swagger\Client\ApiDefaultApi();
 $id = id_example; // String | Unique resource identifier.
 $body = {
   "value" : {
+    "id" : "5099803df3f4948bd2f98391",
     "description" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed vestibulum justo. Pellentesque orci eros, convallis fringilla velit at, consequat volutpat urna. Mauris nec dui sapien. Praesent at mattis urna. Aenean pellentesque placerat vulputate. Aliquam vel orci aliquam magna pretium viverra ullamcorper bibendum metus. Maecenas eu nisl interdum, lacinia ipsum vel, tempus velit. Etiam efficitur aliquet justo. Morbi rutrum malesuada dui nec vulputate. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed porttitor molestie augue placerat rhoncus. Morbi eu nisl id urna aliquet vestibulum sed semper metus. Suspendisse tempus lorem lacus, non fringilla est sodales at. Maecenas congue facilisis erat, vel vestibulum justo scelerisque sed. Donec vel aliquet ante, a varius purus. Nam tempor pellentesque lorem, eu convallis magna fringilla sit amet.",
     "title" : "Factory New Audi A4",
     "category" : "cars",
     "askingPrice" : 20000,
+    "posted" : "2019-08-24T14:15:22Z",
     "deliveryType" : {
       "shipping" : true,
       "pickup" : true
-    }
+    },
+    "seller" : {
+      "email" : "testaaja123@test.com",
+      "phoneNumber" : "+358401231231",
+      "username" : "Testaaja123"
+    },
+    "location" : {
+      "city" : "Oulu",
+      "country" : "Finland",
+      "postalCode" : "90550",
+      "street" : "Testaajantie 123"
+    },
+    "imageUrls" : [ "http://www.jikaheimo.software/api/images/1asdasdasd.png" ]
   }
 }; // PostProperties | Required data in correct format to modify a post.
 $authorization = authorization_example; // String | User specific bearer token.
@@ -4935,14 +5038,28 @@ api_instance = swagger_client.DefaultApi()
 id = id_example # String | Unique resource identifier.
 body = {
   "value" : {
+    "id" : "5099803df3f4948bd2f98391",
     "description" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed vestibulum justo. Pellentesque orci eros, convallis fringilla velit at, consequat volutpat urna. Mauris nec dui sapien. Praesent at mattis urna. Aenean pellentesque placerat vulputate. Aliquam vel orci aliquam magna pretium viverra ullamcorper bibendum metus. Maecenas eu nisl interdum, lacinia ipsum vel, tempus velit. Etiam efficitur aliquet justo. Morbi rutrum malesuada dui nec vulputate. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed porttitor molestie augue placerat rhoncus. Morbi eu nisl id urna aliquet vestibulum sed semper metus. Suspendisse tempus lorem lacus, non fringilla est sodales at. Maecenas congue facilisis erat, vel vestibulum justo scelerisque sed. Donec vel aliquet ante, a varius purus. Nam tempor pellentesque lorem, eu convallis magna fringilla sit amet.",
     "title" : "Factory New Audi A4",
     "category" : "cars",
     "askingPrice" : 20000,
+    "posted" : "2019-08-24T14:15:22Z",
     "deliveryType" : {
       "shipping" : true,
       "pickup" : true
-    }
+    },
+    "seller" : {
+      "email" : "testaaja123@test.com",
+      "phoneNumber" : "+358401231231",
+      "username" : "Testaaja123"
+    },
+    "location" : {
+      "city" : "Oulu",
+      "country" : "Finland",
+      "postalCode" : "90550",
+      "street" : "Testaajantie 123"
+    },
+    "imageUrls" : [ "http://www.jikaheimo.software/api/images/1asdasdasd.png" ]
   }
 } # PostProperties | Required data in correct format to modify a post. (optional)
 authorization = authorization_example # String | User specific bearer token. (optional)
@@ -5035,16 +5152,30 @@ except ApiException as e:
         "$ref" : "#/components/schemas/PostProperties"
       },
       "examples" : {
-        "basic" : {
+        "default" : {
           "value" : {
+            "id" : "5099803df3f4948bd2f98391",
             "description" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed vestibulum justo. Pellentesque orci eros, convallis fringilla velit at, consequat volutpat urna. Mauris nec dui sapien. Praesent at mattis urna. Aenean pellentesque placerat vulputate. Aliquam vel orci aliquam magna pretium viverra ullamcorper bibendum metus. Maecenas eu nisl interdum, lacinia ipsum vel, tempus velit. Etiam efficitur aliquet justo. Morbi rutrum malesuada dui nec vulputate. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed porttitor molestie augue placerat rhoncus. Morbi eu nisl id urna aliquet vestibulum sed semper metus. Suspendisse tempus lorem lacus, non fringilla est sodales at. Maecenas congue facilisis erat, vel vestibulum justo scelerisque sed. Donec vel aliquet ante, a varius purus. Nam tempor pellentesque lorem, eu convallis magna fringilla sit amet.",
             "title" : "Factory New Audi A4",
             "category" : "cars",
             "askingPrice" : 20000,
+            "posted" : "2019-08-24T14:15:22Z",
             "deliveryType" : {
               "shipping" : true,
               "pickup" : true
-            }
+            },
+            "seller" : {
+              "email" : "testaaja123@test.com",
+              "phoneNumber" : "+358401231231",
+              "username" : "Testaaja123"
+            },
+            "location" : {
+              "city" : "Oulu",
+              "country" : "Finland",
+              "postalCode" : "90550",
+              "street" : "Testaajantie 123"
+            },
+            "imageUrls" : [ "http://www.jikaheimo.software/api/images/1asdasdasd.png" ]
           }
         }
       }
@@ -5475,10 +5606,15 @@ except ApiException as e:
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Registers a new user. Registering for the API authenticates the user to create, update and delete posts.</p>
+                        <p class="marked">### Register a new user.
+
+Registering for the API authenticates the user to create, update and delete posts, etc. To register user has to provide valid information and have a unique username and email address.
+
+After successful registration, the response body will allow the user to see his/her information and it also provides a fresh JSON web token.
+</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/api/users</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/users</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
@@ -5531,7 +5667,7 @@ public class DefaultApiExample {
     "birthDate" : "1994-08-05",
     "password" : "testaaja"
   }
-}; // UserProperties | Valid request body for registration.
+}; // UserProperties | Valid request body for registration. 
         try {
             inline_response_200 result = apiInstance.registerUser(body);
             System.out.println(result);
@@ -5564,7 +5700,7 @@ public class DefaultApiExample {
     "birthDate" : "1994-08-05",
     "password" : "testaaja"
   }
-}; // UserProperties | Valid request body for registration.
+}; // UserProperties | Valid request body for registration. 
         try {
             inline_response_200 result = apiInstance.registerUser(body);
             System.out.println(result);
@@ -5594,7 +5730,7 @@ public class DefaultApiExample {
     "birthDate" : "1994-08-05",
     "password" : "testaaja"
   }
-}; // Valid request body for registration. (optional)
+}; // Valid request body for registration.  (optional)
 
 DefaultApi *apiInstance = [[DefaultApi alloc] init];
 
@@ -5630,7 +5766,7 @@ var opts = {
     "birthDate" : "1994-08-05",
     "password" : "testaaja"
   }
-} // {{UserProperties}} Valid request body for registration.
+} // {{UserProperties}} Valid request body for registration. 
 };
 var callback = function(error, data, response) {
   if (error) {
@@ -5661,7 +5797,7 @@ namespace Example
         {
 
             var apiInstance = new DefaultApi();
-            var body = new UserProperties(); // UserProperties | Valid request body for registration. (optional) 
+            var body = new UserProperties(); // UserProperties | Valid request body for registration.  (optional) 
 
             try
             {
@@ -5698,7 +5834,7 @@ $body = {
     "birthDate" : "1994-08-05",
     "password" : "testaaja"
   }
-}; // UserProperties | Valid request body for registration.
+}; // UserProperties | Valid request body for registration. 
 
 try {
     $result = $api_instance->registerUser($body);
@@ -5715,7 +5851,7 @@ use WWW::SwaggerClient::Configuration;
 use WWW::SwaggerClient::DefaultApi;
 
 my $api_instance = WWW::SwaggerClient::DefaultApi->new();
-my $body = WWW::SwaggerClient::Object::UserProperties->new(); # UserProperties | Valid request body for registration.
+my $body = WWW::SwaggerClient::Object::UserProperties->new(); # UserProperties | Valid request body for registration. 
 
 eval { 
     my $result = $api_instance->registerUser(body => $body);
@@ -5749,7 +5885,7 @@ body = {
     "birthDate" : "1994-08-05",
     "password" : "testaaja"
   }
-} # UserProperties | Valid request body for registration. (optional)
+} # UserProperties | Valid request body for registration.  (optional)
 
 try: 
     # Register user
@@ -5777,7 +5913,7 @@ except ApiException as e:
                                 <script>
                                 $(document).ready(function() {
                                   var schemaWrapper = {
-  "description" : "Valid request body for registration.",
+  "description" : "Valid request body for registration. ",
   "content" : {
     "application/json" : {
       "schema" : {
@@ -5828,7 +5964,7 @@ except ApiException as e:
 
 
                           <h2>Responses</h2>
-                            <h3> Status: 200 - User was successfully registered. </h3>
+                            <h3> Status: 200 - User was successfully registered. Response will return the bearer access token and the user information of the authenticated user. </h3>
 
                             <ul class="nav nav-tabs nav-tabs-examples" >
                                 <li class="active">
@@ -5846,7 +5982,7 @@ except ApiException as e:
                                     <script>
                                       $(document).ready(function() {
                                         var schemaWrapper = {
-  "description" : "User was successfully registered.",
+  "description" : "User was successfully registered. Response will return the bearer access token and the user information of the authenticated user.",
   "content" : {
     "application/json" : {
       "schema" : {
@@ -6109,16 +6245,20 @@ except ApiException as e:
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Performs a search query for posts based on given parameters. If no search parameters is provided, returns an empty array. 
+                        <p class="marked">### Search posts
 
-Available query parameters:
+Performs a search query for posts based on given filters. If no search filters are provided, returns an empty array. 
+
+Ignores any additional fields passed in the request body. Passed filters have to be provided as a correct type.
+
+#### Available filters:
 * country  - filters posts by country.
 * city     - filters posts by city.
 * posted   - filters posts by date posted.
 * category - filters posts by category.</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/api/posts/search</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/posts/search</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
@@ -6433,7 +6573,7 @@ except ApiException as e:
         "x-content-type" : "application/json"
       },
       "examples" : {
-        "basic" : {
+        "default" : {
           "value" : [ {
             "id" : "5099803df3f4948bd2f98391",
             "description" : "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed vestibulum justo. Pellentesque orci eros, convallis fringilla velit at, consequat volutpat urna. Mauris nec dui sapien. Praesent at mattis urna. Aenean pellentesque placerat vulputate. Aliquam vel orci aliquam magna pretium viverra ullamcorper bibendum metus. Maecenas eu nisl interdum, lacinia ipsum vel, tempus velit. Etiam efficitur aliquet justo. Morbi rutrum malesuada dui nec vulputate. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed porttitor molestie augue placerat rhoncus. Morbi eu nisl id urna aliquet vestibulum sed semper metus. Suspendisse tempus lorem lacus, non fringilla est sodales at. Maecenas congue facilisis erat, vel vestibulum justo scelerisque sed. Donec vel aliquet ante, a varius purus. Nam tempor pellentesque lorem, eu convallis magna fringilla sit amet.",
@@ -6487,6 +6627,67 @@ except ApiException as e:
                                 </div>
                                   <div class="tab-pane" id="responses-searchPosts-200-example-0">
                                       <pre class="prettyprint"><code class="json">[{&quot;id&quot;:&quot;5099803df3f4948bd2f98391&quot;,&quot;description&quot;:&quot;Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed vestibulum justo. Pellentesque orci eros, convallis fringilla velit at, consequat volutpat urna. Mauris nec dui sapien. Praesent at mattis urna. Aenean pellentesque placerat vulputate. Aliquam vel orci aliquam magna pretium viverra ullamcorper bibendum metus. Maecenas eu nisl interdum, lacinia ipsum vel, tempus velit. Etiam efficitur aliquet justo. Morbi rutrum malesuada dui nec vulputate. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed porttitor molestie augue placerat rhoncus. Morbi eu nisl id urna aliquet vestibulum sed semper metus. Suspendisse tempus lorem lacus, non fringilla est sodales at. Maecenas congue facilisis erat, vel vestibulum justo scelerisque sed. Donec vel aliquet ante, a varius purus. Nam tempor pellentesque lorem, eu convallis magna fringilla sit amet.&quot;,&quot;title&quot;:&quot;Factory New Audi A4&quot;,&quot;category&quot;:&quot;cars&quot;,&quot;askingPrice&quot;:20000,&quot;posted&quot;:&quot;2019-08-24T14:15:22Z&quot;,&quot;deliveryType&quot;:{&quot;shipping&quot;:true,&quot;pickup&quot;:true},&quot;seller&quot;:{&quot;email&quot;:&quot;testaaja123@test.com&quot;,&quot;phoneNumber&quot;:&quot;+358401231231&quot;,&quot;username&quot;:&quot;Testaaja123&quot;},&quot;location&quot;:{&quot;city&quot;:&quot;Oulu&quot;,&quot;country&quot;:&quot;Finland&quot;,&quot;postalCode&quot;:&quot;90550&quot;,&quot;street&quot;:&quot;Testaajantie 123&quot;},&quot;imageUrls&quot;:[&quot;www.jikaheimo.software/api/images/1.png&quot;]}]</code></pre>
+                                </div>
+                            </div>
+
+                            <h3> Status: 400 - Typical response for response code 400 (Bad Request). This response can occur if data provided within the request body is in unsupported format, has extra fields or contains invalid data types. </h3>
+
+                            <ul class="nav nav-tabs nav-tabs-examples" >
+                                <li class="active">
+                                  <a data-toggle="tab" href="#responses-searchPosts-400-schema">Schema</a>
+                                </li>
+
+                                  <li class="">
+                                    <a data-toggle="tab" href="#responses-searchPosts-400-example-0">Response Example</a>
+                                  </li>
+                            </ul>
+
+                            <div class="tab-content" style='margin-bottom: 10px;'>
+                                <div class="tab-pane active" id="responses-searchPosts-400-schema">
+                                  <div id='responses-searchPosts-400-schema-400' style="padding: 30px; border-left: 1px solid #eee; border-right: 1px solid #eee; border-bottom: 1px solid #eee;">
+                                    <script>
+                                      $(document).ready(function() {
+                                        var schemaWrapper = {
+  "description" : "Typical response for response code 400 (Bad Request). This response can occur if data provided within the request body is in unsupported format, has extra fields or contains invalid data types.",
+  "content" : {
+    "application/json" : {
+      "schema" : {
+        "$ref" : "#/components/schemas/ErrorMessage"
+      },
+      "examples" : {
+        "default" : {
+          "value" : {
+            "message" : "Invalid request body"
+          }
+        }
+      }
+    }
+  }
+};
+                                        var schema = schemaWrapper.content["application/json"].schema;
+                                        if (schema.$ref != null) {
+                                          schema = defsParser.$refs.get(schema.$ref);
+                                        } else {
+                                          schemaWrapper.components = {};
+                                          schemaWrapper.components.schemas = Object.assign({}, defs);
+                                          $RefParser.dereference(schemaWrapper).catch(function(err) {
+                                            console.log(err);
+                                          });
+                                        }
+
+                                        //console.log(JSON.stringify(schema));
+                                        var view = new JSONSchemaView(schema, 3);
+                                        $('#responses-searchPosts-400-schema-data').val(stringify(schema));
+                                        var result = $('#responses-searchPosts-400-schema-400');
+                                        result.empty();
+                                        result.append(view.render());
+                                      });
+                                    </script>
+                                  </div>
+                                  <input id='responses-searchPosts-400-schema-data' type='hidden' value=''></input>
+                                </div>
+                                  <div class="tab-pane" id="responses-searchPosts-400-example-0">
+                                      <pre class="prettyprint"><code class="json">{&quot;message&quot;:&quot;Invalid request body&quot;}</code></pre>
                                 </div>
                             </div>
 
@@ -6563,11 +6764,17 @@ except ApiException as e:
                         <div class="pull-right"></div>
                         <div class="clearfix"></div>
                         <p></p>
-                        <p class="marked">Replaces and updates post specific images with the provided ones (max 4). Also returns the corresponding API paths of the uploaded image. 
-The user must be authenticated and authorized to upload images. </p>
+                        <p class="marked">### Replace/Upload post image(s)
+
+Replaces and updates post specific images with the provided ones (max 4). Also returns the corresponding API paths of the uploaded image. 
+The user must be authenticated and authorized to upload images. 
+
+Without providing any images, the already stored images will be deleted.
+
+*This like every identifier based resource path might return 404 for invalid id type aswell*</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/api/posts/{id}/upload</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/posts/{id}upload</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
@@ -6591,7 +6798,7 @@ The user must be authenticated and authorized to upload images. </p>
  -H "Authorization: Bearer [[accessToken]]"\
 -H "Accept: application/json"\
 -H "Content-Type: multipart/form-data"\
-"http://localhost:3000/api/posts/{id}/upload"</code></pre>
+"http://localhost:3000/api/posts/{id}upload"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-Default-uploadPostImages-0-java">
                             <pre class="prettyprint"><code class="language-java">import io.swagger.client.*;

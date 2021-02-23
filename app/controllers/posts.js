@@ -23,6 +23,7 @@ import {
 import { IMAGES_PATH } from '../utils/config.js';
 import { validatePost } from '../utils/middleware.js';
 import { createPost, searchPosts } from '../queries/index.js';
+import { deletePostImages } from './utils.js';
 
 // Configure multer to.
 const multerUpload = multer({
@@ -78,8 +79,14 @@ postsRouter.get(
   '/',
   async ({ query: { limit = 20, offset = 0 } }, res, next) => {
     // Throw an error if limit or offset is invalid.
-    if (Number.isNaN(+limit) || Number.isNaN(+offset)) next(badRequestError());
-    if (offset < 0 || limit < 0 || limit > 100) next(badRequestError());
+    if (Number.isNaN(+limit) || Number.isNaN(+offset))
+      next(badRequestError('Limit and offset must be numeric values.'));
+    if (offset < 0 || limit < 0 || limit > 100)
+      next(
+        badRequestError(
+          'Offset must be less than 0, and limit between 0 and 100.'
+        )
+      );
     // Fetch all the posts.
     const posts = await Post.find()
       .limit(+limit)
@@ -144,14 +151,7 @@ postsRouter.post(
       next(badRequestError());
     }
     // Remove old images.
-    const removePromises = post.imageUrls.map(imageUrl => {
-      console.log(imageUrl);
-      const imagePathParts = imageUrl.split('/');
-      const imagePath = imagePathParts[imagePathParts.length - 1];
-      const imageFile = path.join(IMAGES_PATH, imagePath);
-      return fs.rm(imageFile);
-    });
-    await Promise.all(removePromises);
+    await deletePostImages(post);
 
     // Add image extension to image names.
     const imageNames = files.map(
@@ -186,9 +186,9 @@ postsRouter.put(
     authorize, // Make sure the user is authorized to modify the post.
     validatePost, // Make sure post is in valid format.
   ],
-  async ({ post, parsed }, res) => {
+  async ({ post: { id: postId }, parsed }, res) => {
     // Update the post with the provided data.
-    const updatedPost = await Post.findByIdAndUpdate(post.id, parsed, {
+    const updatedPost = await Post.findByIdAndUpdate(postId, parsed, {
       new: true,
     });
     // Return the updated post.
@@ -202,13 +202,15 @@ postsRouter.put(
 postsRouter.delete(
   '/:id', // Id of post to delete.
   [
-    findPost, // Make sure the post exists.
+    findPost, // Make sure the post exists and get it.
     auth.authenticate, // Make sure the user is logged in.
     authorize, // Make sure the is authorized to delete the post.
   ],
   async ({ post }, res) => {
     // Delete the post.
     await Post.findByIdAndRemove(post.id);
+    // Delete post images.
+    await deletePostImages(post);
     // Return the 204 (No Content)
     res.status(204).end();
   }

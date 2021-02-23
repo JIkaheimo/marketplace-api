@@ -20,16 +20,15 @@ const loginReq = (body, { message = null, code }) => {
   return req;
 };
 
-describe('when there is one user in the database', () => {
-  //
-  beforeEach(async () => {
-    await createUsers(otherUsers);
-  });
+beforeEach(async () => {
+  await createUsers(otherUsers);
+});
 
+describe('While handling user requests', () => {
   /*************************
    ** CREATING A NEW USER **
    *************************/
-  describe('POST /api/users', () => {
+  describe('[POST /api/users] Creating a new user', () => {
     // Valid data.
     describe('with valid data', () => {
       it('should create a new user', async () => {
@@ -45,7 +44,7 @@ describe('when there is one user in the database', () => {
           .expect('Content-Type', /application\/json/);
 
         it('should return a body with the sent user info.', () => {
-          expect(req.body).to.deep.contain(newUser);
+          expect(req.body.user).to.include(newUser);
         });
 
         // Get the modified users.
@@ -99,7 +98,7 @@ describe('when there is one user in the database', () => {
   /************************************
    ** AUTHENTICATING AN EXISTING USER **
    ************************************/
-  describe('POST /api/login', () => {
+  describe('[POST /api/login] Authenticating user', () => {
     let user = otherUsers[0];
     let validCredentials = login();
     let userCredentials = { username: user.username, password: user.password };

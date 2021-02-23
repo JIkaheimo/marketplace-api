@@ -8,6 +8,7 @@
 import { ERRORS } from '../constants.js';
 import { loginParser, postParser, userParser } from './bodyParser.js';
 import { badRequestError } from './errors.js';
+import logging from './logging.js';
 
 const {
   unauthorized,
@@ -67,6 +68,9 @@ export const pathProvider = (req, res, next) => {
  * @param {Error|Object} error;
  */
 export const errorHandler = (error, _, res, next) => {
+  // Just to know what happened...
+  logging.i(error.name);
+  logging.i(error.message);
   // Add any error specific handler code here.
   switch (error.name) {
     // Triggers when MongoDB gets invalid data.
@@ -97,14 +101,15 @@ export const errorHandler = (error, _, res, next) => {
     case 'SyntaxError':
     // Triggers for invalid request body.
     case badRequest.strCode:
-      res.status(badRequest.code).json({ message: badRequest.message });
+      res
+        .status(badRequest.code)
+        .json({ message: badRequest.message, detail: error.message });
       break;
     // Triggers when JSON web token cannot be fetched.
     case 'JsonWebTokenError':
     // User is not authenticated.
     case unauthorized.strCode:
       res.status(unauthorized.code).json({ message: unauthorized.message });
-      break;
     // Triggers when MongoDB tries to use invalid ID or cannot convert.
     case 'CastError':
       // Invalid datatype in body...
@@ -122,12 +127,11 @@ export const errorHandler = (error, _, res, next) => {
       break;
     // Unknown erros.
     default:
-      console.log(error.name);
-      console.log(error.message);
+      logging.i(error.message);
       res.status(server.code).json({ message: server.message });
   }
 
-  next(error);
+  next();
 };
 
 /**

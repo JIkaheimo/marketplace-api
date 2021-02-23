@@ -35,7 +35,7 @@ const { unauthorized, notFound, badRequest, forbidden } = ERRORS;
 
 const api = supertest(app);
 
-describe('when there are some posts in the database', () => {
+describe('While handling post requests', () => {
   let token = null;
   let seller = null;
   let location = null;
@@ -69,7 +69,7 @@ describe('when there are some posts in the database', () => {
   /************************
    ** FETCHING ALL POSTS **
    ************************/
-  describe.skip('[GET /api/posts] fetching all posts', () => {
+  describe('[GET /api/posts] fetching all posts', () => {
     let postsAtStart = null;
 
     beforeEach('fetch initial posts', async () => {
@@ -158,9 +158,10 @@ describe('when there are some posts in the database', () => {
       describe('with invalid query parameters', () => {
         // Valid body.
         it('should return bad request for valid body when offset=-1', async () => {
-          await getPosts('?offset=-1')
-            .expect(badRequest.code)
-            .expect({ message: badRequest.message });
+          await getPosts('?offset=-1').expect(badRequest.code).expect({
+            message: badRequest.message,
+            detail: 'Offset must be less than 0, and limit between 0 and 100.',
+          });
         });
 
         // Invalid body.
@@ -168,14 +169,19 @@ describe('when there are some posts in the database', () => {
           await getPosts('?offset=-1')
             .send({ invalid: 'invalid' })
             .expect(badRequest.code)
-            .expect({ message: badRequest.message });
+            .expect({
+              message: badRequest.message,
+              detail:
+                'Offset must be less than 0, and limit between 0 and 100.',
+            });
         });
 
         // Valid body.
         it('should return bad request for valid body when limit=-1', async () => {
-          await getPosts('?limit=-1')
-            .expect(badRequest.code)
-            .expect({ message: badRequest.message });
+          await getPosts('?limit=-1').expect(badRequest.code).expect({
+            message: badRequest.message,
+            detail: 'Offset must be less than 0, and limit between 0 and 100.',
+          });
         });
 
         // Invalid body.
@@ -183,14 +189,19 @@ describe('when there are some posts in the database', () => {
           await getPosts('?limit=-1')
             .send({ invalid: 'invalid' })
             .expect(badRequest.code)
-            .expect({ message: badRequest.message });
+            .expect({
+              message: badRequest.message,
+              detail:
+                'Offset must be less than 0, and limit between 0 and 100.',
+            });
         });
 
         // Valid body.
         it('should return bad request for valid body when limit=101', async () => {
-          await getPosts('?limit=101')
-            .expect(badRequest.code)
-            .expect({ message: badRequest.message });
+          await getPosts('?limit=101').expect(badRequest.code).expect({
+            message: badRequest.message,
+            detail: 'Offset must be less than 0, and limit between 0 and 100.',
+          });
         });
 
         // Invalid body.
@@ -198,7 +209,11 @@ describe('when there are some posts in the database', () => {
           await getPosts('?limit=101')
             .send({ invalid: 'invalid' })
             .expect(badRequest.code)
-            .expect({ message: badRequest.message });
+            .expect({
+              message: badRequest.message.replace,
+              detail:
+                'Offset must be less than 0, and limit between 0 and 100.',
+            });
         });
 
         // Valid body.
@@ -357,7 +372,7 @@ describe('when there are some posts in the database', () => {
   /*************************
    ** CREATING A NEW POST **
    *************************/
-  describe.skip('[POST /api/posts] Creating a post', () => {
+  describe('[POST /api/posts] Creating a post', () => {
     const createPost = () => api.post('/api/posts');
     const createPostAuth = () => withToken(createPost(), token);
 
@@ -496,7 +511,7 @@ describe('when there are some posts in the database', () => {
   /******************************
    ** FETCHING A SPECIFIC POST **
    ******************************/
-  describe.skip('[GET /api/posts/:id] Fetching a post with id', () => {
+  describe('[GET /api/posts/:id] Fetching a post with id', () => {
     const getPost = postId => api.get(`/api/posts/${postId}`);
     const getPostAuth = postId => withToken(getPost(postId), token);
 
@@ -591,7 +606,7 @@ describe('when there are some posts in the database', () => {
   /**********************
    ** MODIFYING A POST **
    **********************/
-  describe.skip('[PUT /api/posts/:id] Modifying a post', () => {
+  describe('[PUT /api/posts/:id] Modifying a post', () => {
     let postsAtStart = null;
     const modifyPost = postId => api.put(`/api/posts/${postId}`);
     const modifyPostAuth = postId => withToken(modifyPost(postId), token);
@@ -755,7 +770,7 @@ describe('when there are some posts in the database', () => {
   /*********************
    ** DELETING A POST **
    *********************/
-  describe.skip('[DELETE /api/posts/:id] Deleting a post', () => {
+  describe('[DELETE /api/posts/:id] Deleting a post', () => {
     let postsAtStart = null;
     const deletePost = postId => api.delete(`/api/posts/${postId}`);
     const deletePostAuth = postId => withToken(deletePost(postId), token);
@@ -896,7 +911,7 @@ describe('when there are some posts in the database', () => {
   /*********************
    ** SEARCHING POSTS **
    *********************/
-  describe.skip('[POST /api/posts/search] Searching posts', () => {
+  describe('[POST /api/posts/search] Searching posts', () => {
     // Helper functions.
     const search = () => api.post('/api/posts/search');
     const searchAuth = () => withToken(search(), token);
@@ -1142,7 +1157,7 @@ describe('when there are some posts in the database', () => {
   /*****************************
    ** UPLOADING POST IMAGE(S) **
    *****************************/
-  describe('POST /api/posts/:id/upload', () => {
+  describe('[POST /api/posts/:id/upload] Uploading images', () => {
     let postsAtStart = null;
     let postForUpload = null;
     let filesAtStart = null;
@@ -1162,10 +1177,6 @@ describe('when there are some posts in the database', () => {
       try {
         await fs.mkdir(IMAGES_PATH);
       } catch {}
-    });
-
-    beforeEach('get number of files', async () => {
-      filesAtStart = 0;
     });
 
     afterEach('delete files', async () => {
@@ -1203,7 +1214,7 @@ describe('when there are some posts in the database', () => {
         .expect(notFound.code)
         .expect({ message: notFound.message });
 
-      expect(await fs.readdir(IMAGES_PATH)).to.have.length(filesAtStart);
+      expect(await fs.readdir(IMAGES_PATH)).to.have.length(0);
     });
 
     // Uploading one image.
@@ -1212,7 +1223,7 @@ describe('when there are some posts in the database', () => {
         .attach('fileName', './app/tests/1.png')
         .expect(200);
 
-      expect(await fs.readdir(IMAGES_PATH)).to.have.length(filesAtStart + 1);
+      expect(await fs.readdir(IMAGES_PATH)).to.have.length(1);
     });
 
     // Uploading multiple images.
@@ -1226,7 +1237,7 @@ describe('when there are some posts in the database', () => {
       expect(res.body).to.have.lengthOf(4);
       expect(res.body[0]).to.be.a('string');
 
-      expect(await fs.readdir(IMAGES_PATH)).to.have.length(filesAtStart + 4);
+      expect(await fs.readdir(IMAGES_PATH)).to.have.length(4);
     });
 
     // Uploading more than max num of images.
@@ -1240,7 +1251,7 @@ describe('when there are some posts in the database', () => {
         .expect(badRequest.code)
         .expect({ message: badRequest.message });
 
-      expect(await fs.readdir(IMAGES_PATH)).to.have.length(filesAtStart);
+      expect(await fs.readdir(IMAGES_PATH)).to.have.length(0);
     });
 
     // Uploading files of
@@ -1250,7 +1261,7 @@ describe('when there are some posts in the database', () => {
         .expect(badRequest.code)
         .expect({ message: badRequest.message });
 
-      expect(await fs.readdir(IMAGES_PATH)).to.have.length(filesAtStart);
+      expect(await fs.readdir(IMAGES_PATH)).to.have.length(0);
     });
 
     // Removing images.

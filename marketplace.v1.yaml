@@ -2,15 +2,17 @@ openapi: 3.0.0
 info:
   title: marketplace-API
   version: '1.0'
-  description: |-
+  description: |
     Simple API developed to serve as a platform for selling and buying used items. As an example of this in Finland would be tori.fi or globally ebay.com
 
-    Related Course
+    **Related Course:**
     Building Cloud Integration, spring 2021
 
-    Design and Development: Jaakko Ikäheimo, Konsta Holm
+    **Design and Development:** 
+    Jaakko Ikäheimo, Konsta Holm
 
-    This API implements the following functional requirements:
+
+    ### This API implements the following functional requirements:
     - User registration and login. 
     - Post creation for authenticated users.
     - Post modification for authenticated users.
@@ -21,19 +23,19 @@ info:
   contact:
     name: Jaakko Ikäheimo
 servers:
-  - url: 'http://localhost:3000'
+  - url: 'http://localhost:3000/api'
     description: Dev
-  - url: 'https://jikaheimo.software/marketplace'
+  - url: 'http://jikaheimo.software:3000/api'
     description: Release
 paths:
-  /api/users:
+  /users:
     parameters: []
     post:
       summary: Register user
       operationId: register-user
       responses:
         '200':
-          description: User was successfully registered.
+          description: User was successfully registered. Response will return the bearer access token and the user information of the authenticated user.
           content:
             application/json:
               schema:
@@ -69,7 +71,12 @@ paths:
           $ref: '#/components/responses/409'
         '500':
           $ref: '#/components/responses/500'
-      description: 'Registers a new user. Registering for the API authenticates the user to create, update and delete posts.'
+      description: |
+        ### Register a new user.
+
+        Registering for the API authenticates the user to create, update and delete posts, etc. To register user has to provide valid information and have a unique username and email address.
+
+        After successful registration, the response body will allow the user to see his/her information and it also provides a fresh JSON web token.
       requestBody:
         content:
           application/json:
@@ -88,8 +95,8 @@ paths:
                   phoneNumber: '+358401231231'
                   birthDate: '1994-08-05'
                   password: testaaja
-        description: Valid request body for registration.
-  '/api/posts/{id}':
+        description: 'Valid request body for registration. '
+  '/posts/{id}':
     parameters:
       - $ref: '#/components/parameters/Id'
     get:
@@ -103,7 +110,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/PostProperties'
               examples:
-                basic:
+                default:
                   value:
                     id: 5099803df3f4948bd2f98391
                     description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed vestibulum justo. Pellentesque orci eros, convallis fringilla velit at, consequat volutpat urna. Mauris nec dui sapien. Praesent at mattis urna. Aenean pellentesque placerat vulputate. Aliquam vel orci aliquam magna pretium viverra ullamcorper bibendum metus. Maecenas eu nisl interdum, lacinia ipsum vel, tempus velit. Etiam efficitur aliquet justo. Morbi rutrum malesuada dui nec vulputate. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed porttitor molestie augue placerat rhoncus. Morbi eu nisl id urna aliquet vestibulum sed semper metus. Suspendisse tempus lorem lacus, non fringilla est sodales at. Maecenas congue facilisis erat, vel vestibulum justo scelerisque sed. Donec vel aliquet ante, a varius purus. Nam tempor pellentesque lorem, eu convallis magna fringilla sit amet.'
@@ -124,13 +131,18 @@ paths:
                       postalCode: '90550'
                       street: Testaajantie 123
                     imageUrls:
-                      - www.jikaheimo.software/api/products/1/images/1.png
+                      - 'http://www.jikaheimo.software/api/images/1asdasdasd.png'
         '404':
           $ref: '#/components/responses/404'
         '500':
           $ref: '#/components/responses/500'
       operationId: display-post
-      description: Displays/fetches a post with the given id.
+      description: |
+        ### Fetch a post
+
+        Displays/fetches a post with the given id.
+
+        *This like every identifier based resource path might return 404 for invalid id type aswell.*
     put:
       summary: Modify a post
       operationId: modify-post
@@ -174,7 +186,12 @@ paths:
           $ref: '#/components/responses/404'
         '500':
           $ref: '#/components/responses/500'
-      description: Modifies a post with the given id. To modify a post user has to be authenticated and authorized.
+      description: |-
+        ### Modify a post.
+
+        Modifies a post with the given id. To modify a post user has to be authenticated and authorized. Also the request body must contain ALL the required fields or otherwise the request is treated as bad.
+
+        *This like every identifier based resource path might return 404 for invalid id type aswell.*
       security:
         - JSONWebToken: []
       requestBody:
@@ -183,15 +200,28 @@ paths:
             schema:
               $ref: '#/components/schemas/PostProperties'
             examples:
-              basic:
+              default:
                 value:
+                  id: 5099803df3f4948bd2f98391
                   description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed vestibulum justo. Pellentesque orci eros, convallis fringilla velit at, consequat volutpat urna. Mauris nec dui sapien. Praesent at mattis urna. Aenean pellentesque placerat vulputate. Aliquam vel orci aliquam magna pretium viverra ullamcorper bibendum metus. Maecenas eu nisl interdum, lacinia ipsum vel, tempus velit. Etiam efficitur aliquet justo. Morbi rutrum malesuada dui nec vulputate. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed porttitor molestie augue placerat rhoncus. Morbi eu nisl id urna aliquet vestibulum sed semper metus. Suspendisse tempus lorem lacus, non fringilla est sodales at. Maecenas congue facilisis erat, vel vestibulum justo scelerisque sed. Donec vel aliquet ante, a varius purus. Nam tempor pellentesque lorem, eu convallis magna fringilla sit amet.'
                   title: Factory New Audi A4
                   category: cars
                   askingPrice: 20000
+                  posted: '2019-08-24T14:15:22Z'
                   deliveryType:
                     shipping: true
                     pickup: true
+                  seller:
+                    email: testaaja123@test.com
+                    phoneNumber: '+358401231231'
+                    username: Testaaja123
+                  location:
+                    city: Oulu
+                    country: Finland
+                    postalCode: '90550'
+                    street: Testaajantie 123
+                  imageUrls:
+                    - 'http://www.jikaheimo.software/api/images/1asdasdasd.png'
         description: Required data in correct format to modify a post.
       parameters:
         - $ref: '#/components/parameters/Bearer'
@@ -214,10 +244,15 @@ paths:
           $ref: '#/components/responses/500'
       security:
         - JSONWebToken: []
-      description: Deletes a post with the given id. To delete a post the user has to be authenticated and authorized.
+      description: |-
+        ### Delete a post
+
+        Deletes a post with the given id. To delete a post the user has to be authenticated and authorized.
+
+        *This like every identifier based resource path might return 404 for invalid id type aswell.*
       parameters:
         - $ref: '#/components/parameters/Bearer'
-  /api/login:
+  /login:
     post:
       summary: Login user
       operationId: login-user
@@ -263,7 +298,12 @@ paths:
           $ref: '#/components/responses/401'
         '500':
           $ref: '#/components/responses/500'
-      description: Authenticates the user to use some Marketplace functionalities. Returns the user related information and bearer token on successful request.
+      description: |-
+        ### Login/Authenticate
+
+        Authenticates the user to use some Marketplace functionalities. The user must provide the username and password as strings.
+
+        After successful login, the response body will allow the user to see his/her information and it also provides a fresh JSON web token.
       requestBody:
         content:
           application/json:
@@ -275,7 +315,8 @@ paths:
                   username: Testaaja
                   password: testaaja123
         description: Username and password for authentication.
-  /api/posts:
+    parameters: []
+  /posts:
     get:
       summary: Display posts
       tags: []
@@ -290,7 +331,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/PostProperties'
               examples:
-                basic:
+                default:
                   value:
                     - id: 5099803df3f4948bd2f98391
                       description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed vestibulum justo. Pellentesque orci eros, convallis fringilla velit at, consequat volutpat urna. Mauris nec dui sapien. Praesent at mattis urna. Aenean pellentesque placerat vulputate. Aliquam vel orci aliquam magna pretium viverra ullamcorper bibendum metus. Maecenas eu nisl interdum, lacinia ipsum vel, tempus velit. Etiam efficitur aliquet justo. Morbi rutrum malesuada dui nec vulputate. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed porttitor molestie augue placerat rhoncus. Morbi eu nisl id urna aliquet vestibulum sed semper metus. Suspendisse tempus lorem lacus, non fringilla est sodales at. Maecenas congue facilisis erat, vel vestibulum justo scelerisque sed. Donec vel aliquet ante, a varius purus. Nam tempor pellentesque lorem, eu convallis magna fringilla sit amet.'
@@ -311,11 +352,14 @@ paths:
                         postalCode: '90550'
                         street: Testaajantie 123
                       imageUrls:
-                        - www.jikaheimo.software/api/products/1/images/1.png
+                        - 'http://www.jikaheimo.software/api/images/1asdasdasd.png'
         '500':
           $ref: '#/components/responses/500'
       operationId: display-posts
-      description: Fetches and displays posts. By default uses paging where the limit is 20 and offset 0.
+      description: |-
+        ### Fetch posts
+
+        Fetches and displays posts. By default returns posts with limit of 20 and offset of 0. Will send back an error if the specified limit or offset is out of boundaries.
       parameters:
         - schema:
             type: number
@@ -374,7 +418,12 @@ paths:
           $ref: '#/components/responses/401'
         '500':
           $ref: '#/components/responses/500'
-      description: Creates a new post. To create a new post user must be authenticated.
+      description: |-
+        ### Create a post
+
+        Creates a new post. To create a new post user must be authenticated. Also the user has to provide ALL the required post information in correct format to be able to create a new post.
+
+        Posts uses JSON webtoken to identify the user creating a new post and fills the seller and location information based on the user information.
       security:
         - JSONWebToken: []
       requestBody:
@@ -392,10 +441,10 @@ paths:
                   deliveryType:
                     shipping: true
                     pickup: true
-        description: Required data in correct format to create a new post.
+        description: 'Required data in correct format to create a new post. '
       parameters:
         - $ref: '#/components/parameters/Bearer'
-  /api/posts/search:
+  /posts/search:
     post:
       summary: Search posts
       operationId: search-posts
@@ -409,7 +458,7 @@ paths:
                 items:
                   $ref: '#/components/schemas/PostProperties'
               examples:
-                basic:
+                default:
                   value:
                     - id: 5099803df3f4948bd2f98391
                       description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam sed vestibulum justo. Pellentesque orci eros, convallis fringilla velit at, consequat volutpat urna. Mauris nec dui sapien. Praesent at mattis urna. Aenean pellentesque placerat vulputate. Aliquam vel orci aliquam magna pretium viverra ullamcorper bibendum metus. Maecenas eu nisl interdum, lacinia ipsum vel, tempus velit. Etiam efficitur aliquet justo. Morbi rutrum malesuada dui nec vulputate. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Sed porttitor molestie augue placerat rhoncus. Morbi eu nisl id urna aliquet vestibulum sed semper metus. Suspendisse tempus lorem lacus, non fringilla est sodales at. Maecenas congue facilisis erat, vel vestibulum justo scelerisque sed. Donec vel aliquet ante, a varius purus. Nam tempor pellentesque lorem, eu convallis magna fringilla sit amet.'
@@ -431,12 +480,18 @@ paths:
                         street: Testaajantie 123
                       imageUrls:
                         - www.jikaheimo.software/api/images/1.png
+        '400':
+          $ref: '#/components/responses/400'
         '500':
           $ref: '#/components/responses/500'
       description: |-
-        Performs a search query for posts based on given parameters. If no search parameters is provided, returns an empty array. 
+        ### Search posts
 
-        Available query parameters:
+        Performs a search query for posts based on given filters. If no search filters are provided, returns an empty array. 
+
+        Ignores any additional fields passed in the request body. Passed filters have to be provided as a correct type.
+
+        #### Available filters:
         * country  - filters posts by country.
         * city     - filters posts by city.
         * posted   - filters posts by date posted.
@@ -480,7 +535,7 @@ paths:
                   category: drinks
         description: Body with different filters
     parameters: []
-  '/api/posts/{id}/upload':
+  '/posts/{id}upload':
     parameters:
       - $ref: '#/components/parameters/Id'
     post:
@@ -500,8 +555,14 @@ paths:
         '500':
           $ref: '#/components/responses/500'
       description: |-
+        ### Replace/Upload post image(s)
+
         Replaces and updates post specific images with the provided ones (max 4). Also returns the corresponding API paths of the uploaded image. 
-        The user must be authenticated and authorized to upload images.
+        The user must be authenticated and authorized to upload images. 
+
+        Without providing any images, the already stored images will be deleted.
+
+        *This like every identifier based resource path might return 404 for invalid id type aswell*
       security:
         - JSONWebToken: []
       requestBody:
@@ -524,16 +585,16 @@ paths:
               required:
                 - filename
             examples: {}
-        description: The image files to upload with the image.
+        description: The image file(s) to upload. Might also be empty response body for deleting images.
       parameters:
         - $ref: '#/components/parameters/Bearer'
-  /api/images:
+  /images:
     get:
       summary: Your GET endpoint
       tags: []
       responses:
         '200':
-          description: OK
+          description: List of image paths available on server.
           content:
             application/json:
               schema:
@@ -542,14 +603,20 @@ paths:
                 items:
                   type: string
               examples:
-                example-1:
+                default:
                   value:
-                    - string
+                    - 'http://jikaheimo.software:3000/api/images/192iafsapsfiapsf9.jpg'
+                    - 'http://jikaheimo.software:3000/api/images/asdasd322332apsf9.png'
         '500':
           $ref: '#/components/responses/500'
       operationId: display-images
-      description: Returns path of every stored post image.
-  '/api/images/{name}':
+      description: |-
+        ### Fetch images
+
+        Returns path of every stored post image in the server. Does not use any kind of restrictions because it only provides a string array...
+        .
+    parameters: []
+  '/images/{name}':
     parameters:
       - schema:
           type: string
@@ -576,7 +643,12 @@ paths:
         '500':
           $ref: '#/components/responses/500'
       operationId: display-image
-      description: Returns an image with the specified name/identifier.
+      description: |
+        ### Fetch image
+
+        Returns an image in image format with the specified name/identifier.
+
+        *This like every identifier based resource path might return 404 for invalid id type aswell*
 components:
   schemas:
     UserProperties:
@@ -677,7 +749,7 @@ components:
             postalCode: 90550
             street: Testaajantie 123
           imageUrls:
-            - www.jikaheimo.software/api/products/1/images/1.png
+            - 'http://www.jikaheimo.software/api/images/asfjiasfpajpo.png'
       additionalProperties: false
       properties:
         id:
@@ -721,10 +793,10 @@ components:
         deliveryType:
           type: object
           description: Delivery type of sold product
+          additionalProperties: false
           required:
             - shipping
             - pickup
-          additionalProperties: false
           properties:
             shipping:
               type: boolean
@@ -744,7 +816,7 @@ components:
           minItems: 0
           items:
             type: string
-            example: www.jikaheimo.software/api/products/1/images/1.png
+            example: 'http://www.jikaheimo.software/api/images/1asdasdasd.png'
           readOnly: true
       required:
         - description
@@ -812,7 +884,7 @@ components:
     ErrorMessage:
       type: object
       title: ErrorMessage
-      description: Typical message returned when either 4xx or 5xx error occurs.
+      description: Typical respone body returned when either 4xx or 5xx error occurs.
       x-examples:
         '401':
           message: Unauthorized
@@ -829,12 +901,13 @@ components:
       properties:
         message:
           type: string
-          description: Message describing the cause of error.
+          description: Simple message describing the cause of the error.
           example: 'Something went wrong :('
           readOnly: true
-        description:
+        detail:
           type: string
           example: More specific description about the error (optional).
+          description: More specific description about the error.
           readOnly: true
       required:
         - message

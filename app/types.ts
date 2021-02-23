@@ -2,6 +2,7 @@
  * These type declarations are mainly used
  * to enable VSCode JSDoc features.
  */
+import { RequestHandler } from 'express';
 import { ObjectID } from 'mongodb';
 
 export type BodyParser = (body: Object) => { extras: Object };
