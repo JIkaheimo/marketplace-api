@@ -9,7 +9,14 @@ import { ERRORS } from '../constants.js';
 import { loginParser, postParser, userParser } from './bodyParser.js';
 import { badRequestError } from './errors.js';
 
-const { unauthorized, forbidden, badRequest, notFound, conflict } = ERRORS;
+const {
+  unauthorized,
+  forbidden,
+  badRequest,
+  notFound,
+  conflict,
+  server,
+} = ERRORS;
 
 /**
  * Creates a simple body validator that checks the request body
@@ -56,12 +63,10 @@ export const pathProvider = (req, res, next) => {
 
 /**
  * Error handler.
+ * @type {import('express').ErrorRequestHandler}
+ * @param {Error|Object} error;
  */
-export const errorHandler = (error, req, res, next) => {
-  //console.log(error.name);
-  //console.log(error.message);
-  //console.log(error.stacktrace);
-
+export const errorHandler = (error, _, res, next) => {
   // Add any error specific handler code here.
   switch (error.name) {
     // Triggers when MongoDB gets invalid data.
@@ -100,8 +105,13 @@ export const errorHandler = (error, req, res, next) => {
     case unauthorized.strCode:
       res.status(unauthorized.code).json({ message: unauthorized.message });
       break;
-    // Triggers when MongoDB tries to use invalid ID.
+    // Triggers when MongoDB tries to use invalid ID or cannot convert.
     case 'CastError':
+      // Invalid datatype in body...
+      if (!error.message.startsWith('Cast to ObjectId')) {
+        res.status(badRequest.code).json({ message: badRequest.message });
+        break;
+      }
     // Nonexisting resource/path.
     case notFound.strCode:
       res.status(notFound.code).json({ message: notFound.message });
@@ -109,6 +119,12 @@ export const errorHandler = (error, req, res, next) => {
     // Unauthorized user.
     case forbidden.strCode:
       res.status(forbidden.code).json({ message: forbidden.message });
+      break;
+    // Unknown erros.
+    default:
+      console.log(error.name);
+      console.log(error.message);
+      res.status(server.code).json({ message: server.message });
   }
 
   next(error);
@@ -116,7 +132,8 @@ export const errorHandler = (error, req, res, next) => {
 
 /**
  * Handles unknown API endpoints.
+ * @type {import('express').RequestHandler}
  */
-export const unknownHandler = (req, res) => {
+export const unknownHandler = (_, res) => {
   res.status(notFound.code).send({ message: notFound.message });
 };

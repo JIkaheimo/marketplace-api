@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 import { addressSchema } from './index.js';
 import { default as validator } from 'validator';
-import {} from 'moment';
+import moment from 'moment';
 
 /**
  * Schema of delivery type.
@@ -32,15 +32,18 @@ export const sellerSchema = mongoose.Schema(
     phoneNumber: {
       type: String,
       required: true,
+      cast: false,
     },
     email: {
       type: String,
       required: true,
-      validate: [validator.isEmail],
+      validate: validator.isEmail,
+      cast: false,
     },
     username: {
       type: String,
       required: true,
+      cast: false,
     },
   },
   { _id: false, strict: 'throw' }
@@ -122,9 +125,9 @@ postSchema.pre('findOneAndUpdate', function (next) {
 
 // Remove extra fields when convertint to JSON.
 postSchema.set('toJSON', {
-  transform: (document, post) => {
+  transform: (_, post) => {
     post.id = post._id.toString();
-    post.posted = post.posted.toString();
+    post.posted = moment(post.posted).toISOString().split('T')[0];
     delete post._id;
     delete post.__v;
   },

@@ -1,30 +1,33 @@
-import bcrypt from 'bcrypt';
 import { Router } from 'express';
 import { User } from '../models/index.js';
 import { hash } from '../utils/auth.js';
-import { validateUser } from '../utils/middleware.js';
 
 const usersRouter = Router();
 
 // Create a new user
-usersRouter.post('/', [hash], async ({ body, passwordHash }, res, next) => {
-  // Make sure not to store the password.
-  const { password, ...userInfo } = body;
-  // Create a new User model.
-  const user = new User(
-    {
-      ...userInfo,
-      passwordHash,
-      creationDate: new Date().toISOString().split('T')[0],
-    },
-    true
-  );
-  // Save the user.
-  const savedUser = await user.save();
+usersRouter.post(
+  '/',
+  [
+    hash, // Make sure to hash the password.
+  ],
+  async ({ body, passwordHash }, res) => {
+    // Make sure not to store the password.
+    const { password, ...userInfo } = body;
+    // Create a new User model.
+    const user = new User(
+      {
+        ...userInfo,
+        passwordHash,
+        creationDate: new Date().toISOString().split('T')[0],
+      },
+      true
+    );
+    // Save the user.
+    const savedUser = await user.save();
 
-  console.dir(savedUser.toJSON());
-  // Return the newly created user and token.
-  res.json({ user: savedUser, token: savedUser.token });
-});
+    // Return the newly created user and token.
+    res.json({ user: savedUser, token: savedUser.token });
+  }
+);
 
 export default usersRouter;

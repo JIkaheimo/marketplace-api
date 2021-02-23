@@ -16,18 +16,22 @@ export const addressSchema = mongoose.Schema(
     city: {
       type: String,
       required: true,
+      cast: false,
     },
     country: {
       type: String,
       required: true,
+      cast: false,
     },
     postalCode: {
       type: String,
       required: true,
+      cast: false,
     },
     street: {
       type: String,
       required: true,
+      cast: false,
     },
   },
   { _id: false, strict: 'throw' }
@@ -43,33 +47,40 @@ export const userSchema = mongoose.Schema(
       required: true,
       unique: true,
       validate: validator.isEmail,
+      cast: false,
     },
     username: {
       type: String,
       required: true,
       unique: [true, 'User with that username aready exists!'],
+      cast: false,
     },
     passwordHash: {
       type: String,
       required: true,
+      cast: false,
     },
     birthDate: {
       type: String,
       required: true,
       validator: isValidDate,
+      cast: false,
     },
     creationDate: {
       type: String,
       required: true,
       validate: isValidDate,
+      cast: false,
     },
     address: {
       type: addressSchema,
       required: true,
+      cast: false,
     },
     phoneNumber: {
       type: String,
       required: true,
+      cast: false,
     },
   },
   { strict: 'throw' }

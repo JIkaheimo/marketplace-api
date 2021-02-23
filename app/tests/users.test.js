@@ -6,7 +6,7 @@ import { default as chai } from 'chai';
 const { expect } = chai;
 
 import app from '../server.js';
-import { usersInDb, initialUsers, getNewUser, createUsers } from './helpers.js';
+import { usersInDb, otherUsers, getNewUser, createUsers } from './helpers.js';
 import { ERRORS } from '../constants.js';
 import { login, removeField } from './data.js';
 import { User } from '../models/user.js';
@@ -23,16 +23,14 @@ const loginReq = (body, { message = null, code }) => {
 describe('when there is one user in the database', () => {
   //
   beforeEach(async () => {
-    await createUsers(initialUsers);
+    await createUsers(otherUsers);
   });
 
   /*************************
    ** CREATING A NEW USER **
    *************************/
   describe('POST /api/users', () => {
-    /*
-     * FOR VALID DATA
-     */
+    // Valid data.
     describe('with valid data', () => {
       it('should create a new user', async () => {
         // Get the users in the beginning.
@@ -102,9 +100,8 @@ describe('when there is one user in the database', () => {
    ** AUTHENTICATING AN EXISTING USER **
    ************************************/
   describe('POST /api/login', () => {
-    let user = initialUsers[0];
+    let user = otherUsers[0];
     let validCredentials = login();
-    console.log(user);
     let userCredentials = { username: user.username, password: user.password };
 
     // Invalid request body.

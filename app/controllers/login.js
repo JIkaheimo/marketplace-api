@@ -6,8 +6,11 @@
  * @module controllers/login
  */
 
+// Third-party modules.
 import bcrypt from 'bcrypt';
 import { Router } from 'express';
+
+// In-house modules.
 import { User } from '../models/index.js';
 import { errors, mware } from '../utils/index.js';
 

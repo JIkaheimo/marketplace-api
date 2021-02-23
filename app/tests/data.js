@@ -88,7 +88,7 @@ export const post = user => ({
   seller: getSeller(user),
   location: { ...user.address },
   imageUrls: [],
-  posted: faker.date.recent(),
+  posted: faker.date.past(),
 });
 
 /**

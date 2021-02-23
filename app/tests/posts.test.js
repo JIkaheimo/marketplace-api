@@ -15,30 +15,23 @@ import { getLocation, getSeller, Post, User } from '../models/index.js';
 
 import {
   withToken,
-  initialUser,
-  initialPosts,
+  owner,
+  ownerPosts,
   postsInDb,
   fakeId,
   getNewPost,
   getToken,
   createUsers,
+  otherPosts,
+  ownerPostsInDb,
+  otherPostsInDb,
 } from './helpers.js';
 
 import { ERRORS } from '../constants.js';
-import { post, removeField, user } from './data.js';
+import { removeField } from './data.js';
+import { IMAGES_PATH } from '../utils/config.js';
 
 const { unauthorized, notFound, badRequest, forbidden } = ERRORS;
-
-/**
- * Simple higher-order function to allow easier
- * comparison of posts in the beginning and the end.
- */
-const comparePosts = (postsAtStart, callback) => {
-  return async () => {
-    const postsAtEnd = await postsInDb();
-    callback(postsAtStart, postsAtEnd);
-  };
-};
 
 const api = supertest(app);
 
@@ -48,59 +41,323 @@ describe('when there are some posts in the database', () => {
   let location = null;
 
   // Fill database with user.
-  beforeEach('Create test user.', async () => {
-    await createUsers([initialUser]);
+  beforeEach('create the test user', async () => {
+    await createUsers([owner]);
   });
 
   // Fill test database with some posts.
-  beforeEach('Create test posts.', async () => {
-    await Post.deleteMany({});
-    await Post.insertMany(initialPosts);
+  beforeEach('create test posts.', async () => {
+    await Post.insertMany([...ownerPosts, ...otherPosts]);
   });
 
   // Get valid breare token.
-  beforeEach('Get valid bearer token.', async () => {
-    token = await getToken(initialUser.username);
+  beforeEach('get valid bearer token', async () => {
+    token = await getToken(owner.username);
   });
-  //
-  beforeEach('Get post data from user.', () => {
-    seller = getSeller(initialUser);
-    location = getLocation(initialUser);
+
+  // Get seller post data.
+  beforeEach('get post data from the user', () => {
+    seller = getSeller(owner);
+    location = getLocation(owner);
+  });
+
+  // Make sure to remove posts.
+  afterEach('remove test posts', async () => {
+    await Post.deleteMany({});
   });
 
   /************************
    ** FETCHING ALL POSTS **
    ************************/
-  describe('[GET /api/posts] fetching all posts', () => {
+  describe.skip('[GET /api/posts] fetching all posts', () => {
+    let postsAtStart = null;
+
+    beforeEach('fetch initial posts', async () => {
+      postsAtStart = await postsInDb();
+    });
+
     // Helper functions.
-    const getPosts = () => api.get('/api/posts');
-    //
-    it('should return posts as JSON', async () => {
-      await getPosts()
-        .expect(200)
-        .expect('Content-Type', /application\/json/);
+    const getPosts = (params = '') => api.get(`/api/posts${params}`);
+    const getPostsAuth = params => withToken(getPosts(params), token);
+    const getLength = length =>
+      length > postsAtStart.length ? postsAtStart.length : length;
+
+    // Without authentication.
+    describe('without authentication', () => {
+      // Without query parameters.
+      describe('without query parameters', () => {
+        // Valid body.
+        it('should return the first 20 posts by default fo valid body', async () => {
+          const res = await getPosts()
+            .expect(200)
+            .expect(postsAtStart.slice(0, 20));
+          expect(res.body).to.have.length(getLength(20));
+        });
+
+        // Invalid body.
+        it('should return the first 20 posts by default for invalid body', async () => {
+          const res = await getPosts()
+            .send({ invalid: 'invalid' })
+            .expect(200)
+            .expect(postsAtStart.slice(0, 20));
+          expect(res.body).to.have.length(getLength(20));
+        });
+      });
+
+      // With valid query parameters.
+      describe('with valid query parameters', () => {
+        // Valid body.
+        it('should return the first 20 posts for valid body when offset=0 limit=20', async () => {
+          const res = await getPosts('?limit=20&offset=0')
+            .expect(200)
+            .expect(postsAtStart.slice(0, 20));
+          expect(res.body).to.have.length(getLength(20));
+        });
+
+        // Invalid body.
+        it('should return the first 20 posts for invalid body when offset=0 limit=20', async () => {
+          const res = await getPosts('?limit=20&offset=0')
+            .send({ invalid: 'invalid' })
+            .expect(200)
+            .expect(postsAtStart.slice(0, 20));
+          expect(res.body).to.have.length(getLength(20));
+        });
+
+        // Valid body.
+        it('should return the first 20 posts from offset 2 for valid body when offset=2', async () => {
+          await getPosts('?offset=2')
+            .expect(200)
+            .expect(postsAtStart.slice(2, 22));
+        });
+
+        // Invalid body.
+        it('should return the first 20 posts by default for invalid body when offset=2', async () => {
+          await getPosts('?offset=2')
+            .send({ invalid: 'invalid' })
+            .expect(200)
+            .expect(postsAtStart.slice(2, 22));
+        });
+
+        // Valid body.
+        it('should return the empty array with offset >= numPosts for valid body', async () => {
+          await getPosts(`?offset=${postsAtStart.length}`)
+            .expect(200)
+            .expect([]);
+        });
+
+        // Invalid body.
+        it('should return the empty array with offset >= numPosts for invalid body', async () => {
+          await getPosts(`?offset=${postsAtStart.length}`)
+            .send({ invalid: 'invalid' })
+            .expect(200)
+            .expect([]);
+        });
+      });
+
+      // With invvalid query parameters.
+      describe('with invalid query parameters', () => {
+        // Valid body.
+        it('should return bad request for valid body when offset=-1', async () => {
+          await getPosts('?offset=-1')
+            .expect(badRequest.code)
+            .expect({ message: badRequest.message });
+        });
+
+        // Invalid body.
+        it('should return bad request for invalid body when offset=-1', async () => {
+          await getPosts('?offset=-1')
+            .send({ invalid: 'invalid' })
+            .expect(badRequest.code)
+            .expect({ message: badRequest.message });
+        });
+
+        // Valid body.
+        it('should return bad request for valid body when limit=-1', async () => {
+          await getPosts('?limit=-1')
+            .expect(badRequest.code)
+            .expect({ message: badRequest.message });
+        });
+
+        // Invalid body.
+        it('should return bad request for invalid body when limit=-1', async () => {
+          await getPosts('?limit=-1')
+            .send({ invalid: 'invalid' })
+            .expect(badRequest.code)
+            .expect({ message: badRequest.message });
+        });
+
+        // Valid body.
+        it('should return bad request for valid body when limit=101', async () => {
+          await getPosts('?limit=101')
+            .expect(badRequest.code)
+            .expect({ message: badRequest.message });
+        });
+
+        // Invalid body.
+        it('should return bad request for invalid body when limit=101', async () => {
+          await getPosts('?limit=101')
+            .send({ invalid: 'invalid' })
+            .expect(badRequest.code)
+            .expect({ message: badRequest.message });
+        });
+
+        // Valid body.
+        it('should return bad request for valid body when limit type is invalid', async () => {
+          await getPosts('?limit=asdasd')
+            .expect(badRequest.code)
+            .expect({ message: badRequest.message });
+        });
+
+        // Invalid body.
+        it('should return bad request for invalid body when limit type is invalid', async () => {
+          await getPosts('?limit=asdasd')
+            .send({ invalid: 'invalid' })
+            .expect(badRequest.code)
+            .expect({ message: badRequest.message });
+        });
+      });
     });
 
-    it('should return all posts', async () => {
-      const res = await getPosts();
-      expect(res.body).to.have.length(initialPosts.length);
-    });
+    describe('with authentication', () => {
+      // Without query parameters.
+      describe('without query parameters', () => {
+        // Valid body.
+        it('should return the first 20 posts by default fo valid body', async () => {
+          const res = await getPostsAuth()
+            .expect(200)
+            .expect(postsAtStart.slice(0, 20));
+          expect(res.body).to.have.length(getLength(20));
+        });
 
-    it('should contain specific post', async () => {
-      const res = await getPosts();
-      const titles = res.body.map(r => r.title);
-      expect(titles).to.contain(initialPosts[0].title);
-    });
+        // Invalid body.
+        it('should return the first 20 posts by default for invalid body', async () => {
+          const res = await getPostsAuth()
+            .send({ invalid: 'invalid' })
+            .expect(200)
+            .expect(postsAtStart.slice(0, 20));
+          expect(res.body).to.have.length(getLength(20));
+        });
+      });
 
-    it('should work for authenticated user', async () => {
-      await withToken(getPosts(), token).expect(200);
+      // With valid query parameters.
+      describe('with valid query parameters', () => {
+        // Valid body.
+        it('should return the first 20 posts for valid body when offset=0 limit=20', async () => {
+          const res = await getPostsAuth('?limit=20&offset=0')
+            .expect(200)
+            .expect(postsAtStart.slice(0, 20));
+          expect(res.body).to.have.length(getLength(20));
+        });
+
+        // Invalid body.
+        it('should return the first 20 posts for invalid body when offset=0 limit=20', async () => {
+          const res = await getPostsAuth('?limit=20&offset=0')
+            .send({ invalid: 'invalid' })
+            .expect(200)
+            .expect(postsAtStart.slice(0, 20));
+          expect(res.body).to.have.length(getLength(20));
+        });
+
+        // Valid body.
+        it('should return the first 20 posts from offset 2 for valid body when offset=2', async () => {
+          await getPostsAuth('?offset=2')
+            .expect(200)
+            .expect(postsAtStart.slice(2, 22));
+        });
+
+        // Invalid body.
+        it('should return the first 20 posts by default for invalid body when offset=2', async () => {
+          await getPostsAuth('?offset=2')
+            .send({ invalid: 'invalid' })
+            .expect(200)
+            .expect(postsAtStart.slice(2, 22));
+        });
+
+        // Valid body.
+        it('should return the empty array with offset >= numPosts for valid body', async () => {
+          await getPostsAuth(`?offset=${postsAtStart.length}`)
+            .expect(200)
+            .expect([]);
+        });
+
+        // Invalid body.
+        it('should return the empty array with offset >= numPosts for invalid body', async () => {
+          await getPostsAuth(`?offset=${postsAtStart.length}`)
+            .send({ invalid: 'invalid' })
+            .expect(200)
+            .expect([]);
+        });
+      });
+
+      // With invvalid query parameters.
+      describe('with invalid query parameters', () => {
+        // Valid body.
+        it('should return bad request for valid body when offset=-1', async () => {
+          await getPostsAuth('?offset=-1')
+            .expect(badRequest.code)
+            .expect({ message: badRequest.message });
+        });
+
+        // Invalid body.
+        it('should return bad request for invalid body when offset=-1', async () => {
+          await getPostsAuth('?offset=-1')
+            .send({ invalid: 'invalid' })
+            .expect(badRequest.code)
+            .expect({ message: badRequest.message });
+        });
+
+        // Valid body.
+        it('should return bad request for valid body when limit=-1', async () => {
+          await getPostsAuth('?limit=-1')
+            .expect(badRequest.code)
+            .expect({ message: badRequest.message });
+        });
+
+        // Invalid body.
+        it('should return bad request for invalid body when limit=-1', async () => {
+          await getPostsAuth('?limit=-1')
+            .send({ invalid: 'invalid' })
+            .expect(badRequest.code)
+            .expect({ message: badRequest.message });
+        });
+
+        // Valid body.
+        it('should return bad request for valid body when limit=101', async () => {
+          await getPostsAuth('?limit=101')
+            .expect(badRequest.code)
+            .expect({ message: badRequest.message });
+        });
+
+        // Invalid body.
+        it('should return bad request for invalid body when limit=101', async () => {
+          await getPostsAuth('?limit=101')
+            .send({ invalid: 'invalid' })
+            .expect(badRequest.code)
+            .expect({ message: badRequest.message });
+        });
+
+        // Valid body.
+        it('should return bad request for valid body when limit type is invalid', async () => {
+          await getPostsAuth('?limit=asdasd')
+            .expect(badRequest.code)
+            .expect({ message: badRequest.message });
+        });
+
+        // Invalid body.
+        it('should return bad request for invalid body when limit type is invalid', async () => {
+          await getPostsAuth('?limit=asdasd')
+            .send({ invalid: 'invalid' })
+            .expect(badRequest.code)
+            .expect({ message: badRequest.message });
+        });
+      });
     });
   });
 
   /*************************
    ** CREATING A NEW POST **
    *************************/
-  describe('[POST /api/posts] Creating a post', () => {
+  describe.skip('[POST /api/posts] Creating a post', () => {
     const createPost = () => api.post('/api/posts');
     const createPostAuth = () => withToken(createPost(), token);
 
@@ -195,7 +452,7 @@ describe('when there are some posts in the database', () => {
             .expect(badRequest.code)
             .expect({ message: badRequest.message });
           const postsAtEnd = await postsInDb();
-          expect(postsAtEnd).to.have.length(initialPosts.length);
+          expect(postsAtEnd).to.have.length(postsAtStart.length);
         };
 
         it('should not create a post with invalid title', async () => {
@@ -203,7 +460,7 @@ describe('when there are some posts in the database', () => {
           await testInvalidPost({ ...getNewPost(), title: 1231203910231 });
           await testInvalidPost({ ...getNewPost(), title: 'asd' });
           await testInvalidPost({
-            ...initialPosts[0],
+            ...getNewPost(),
             title: 'asdasdaksljfjlasfljajsflkasjlflkasf',
           });
         });
@@ -239,39 +496,94 @@ describe('when there are some posts in the database', () => {
   /******************************
    ** FETCHING A SPECIFIC POST **
    ******************************/
-  describe('[GET /api/posts/:id] Fetching a post with id', () => {
-    const getPost = id => api.get(`/api/posts/${id}`);
-    const getPostAuth = withToken(getPost(), token);
+  describe.skip('[GET /api/posts/:id] Fetching a post with id', () => {
+    const getPost = postId => api.get(`/api/posts/${postId}`);
+    const getPostAuth = postId => withToken(getPost(postId), token);
 
-    describe('with valid id', () => {
-      // Post with valid id.
-      it('should return a post with the id', async () => {
-        const postsAtStart = await postsInDb();
-        const postToView = faker.random.arrayElement(postsAtStart);
+    // Invalid indentifier.
+    describe('with invalid identifier', () => {
+      // Without authentication.
+      describe('without authentication', () => {
+        // Non-existing id.
+        it('should return not found for non-existing id', async () => {
+          await getPost(fakeId())
+            .expect(notFound.code)
+            .expect({ message: notFound.message });
+        });
 
-        const resultPost = await getPost(postToView.id)
-          .expect(200)
-          .expect('Content-Type', /application\/json/);
+        // Invalid id.
+        it('should return not found for invalid id', async () => {
+          await getPost('invalid-id')
+            .expect(notFound.code)
+            .expect({ message: notFound.message });
+        });
+      });
 
-        const prPostToView = JSON.parse(JSON.stringify(postToView));
-        expect(resultPost.body).to.eql(prPostToView);
+      // With authentication.
+      describe('with authentication', () => {
+        // Non-existing id.
+        it('should return not found for non-existing id', async () => {
+          await getPostAuth(fakeId())
+            .expect(notFound.code)
+            .expect({ message: notFound.message });
+        });
+
+        // Invalid id.
+        it('should return not found for invalid id', async () => {
+          await getPostAuth('invalid-id')
+            .expect(notFound.code)
+            .expect({ message: notFound.message });
+        });
       });
     });
 
-    describe('with non-existing id', () => {
-      it('should return status code 404 (Not Found)', async () => {
-        await getPost(fakeId())
-          .expect(notFound.code)
-          .expect({ message: notFound.message });
-      });
-    });
+    // Valid identifier.
+    describe('with valid identifier', () => {
+      let postToView = null;
 
-    describe('with invalid id', () => {
-      it('should return status code 404 (Bad Request)', async () => {
-        await api
-          .get('/api/posts/5a3d5da59070081a82a3445')
-          .expect(notFound.code)
-          .expect({ message: notFound.message });
+      // Randomize post to view.
+      beforeEach('randomize post to view', async () => {
+        const posts = await postsInDb();
+        postToView = faker.random.arrayElement(posts);
+      });
+
+      // Without authentication.
+      describe('without authentication', () => {
+        // Valid body.
+        it('should return the post for valid body', async () => {
+          const res = await getPost(postToView.id)
+            .expect(200)
+            .expect(postToView);
+          expect(res.body.id).to.equal(postToView.id);
+        });
+
+        // Invalid body.
+        it('should return the post for invalid body', async () => {
+          const res = await getPostAuth(postToView.id)
+            .expect(200)
+            .expect(postToView);
+          expect(res.body.id).to.equal(postToView.id);
+        });
+      });
+
+      // With authentication.
+      describe('with authentication', () => {
+        // Valid body.
+        it('should return the post for valid body', async () => {
+          const res = await getPostAuth(postToView.id)
+            .expect(200)
+            .expect(postToView);
+          expect(res.body.id).to.equal(postToView.id);
+        });
+
+        // Invalid body.
+        it('should return the post for invalid body', async () => {
+          const res = await getPostAuth(postToView.id)
+            .send({ invalid: 'invalid' })
+            .expect(200)
+            .expect(postToView);
+          expect(res.body.id).to.equal(postToView.id);
+        });
       });
     });
   });
@@ -279,7 +591,7 @@ describe('when there are some posts in the database', () => {
   /**********************
    ** MODIFYING A POST **
    **********************/
-  describe('[PUT /api/posts/:id] Modifying a post', () => {
+  describe.skip('[PUT /api/posts/:id] Modifying a post', () => {
     let postsAtStart = null;
     const modifyPost = postId => api.put(`/api/posts/${postId}`);
     const modifyPostAuth = postId => withToken(modifyPost(postId), token);
@@ -346,7 +658,8 @@ describe('when there are some posts in the database', () => {
 
       // Get a valid post id.
       beforeEach('randomize post to modify', async () => {
-        postToModify = faker.random.arrayElement(postsAtStart);
+        const userPosts = await ownerPostsInDb();
+        postToModify = faker.random.arrayElement(userPosts);
       });
 
       // Without authentication.
@@ -423,8 +736,9 @@ describe('when there are some posts in the database', () => {
 
         // Unauthorized.
         it('should return forbidden if trying to modify post of other', async () => {
-          postToModify = new Post(post(user('random')));
-          await postToModify.save();
+          const tempPosts = await otherPostsInDb();
+          postToModify = faker.random.arrayElement(tempPosts);
+
           await modifyPostAuth(postToModify.id)
             .send(getNewPost())
             .expect(forbidden.code)
@@ -432,7 +746,7 @@ describe('when there are some posts in the database', () => {
 
           // Make sure no post was modified.
           const postAfter = await Post.findById(postToModify.id);
-          expect(postToModify.toJSON()).to.be.eql(postAfter.toJSON());
+          expect(postToModify).to.be.eql(postAfter.toJSON());
         });
       });
     });
@@ -441,7 +755,7 @@ describe('when there are some posts in the database', () => {
   /*********************
    ** DELETING A POST **
    *********************/
-  describe('[DELETE /api/posts/:id] Deleting a post', () => {
+  describe.skip('[DELETE /api/posts/:id] Deleting a post', () => {
     let postsAtStart = null;
     const deletePost = postId => api.delete(`/api/posts/${postId}`);
     const deletePostAuth = postId => withToken(deletePost(postId), token);
@@ -508,7 +822,7 @@ describe('when there are some posts in the database', () => {
 
       // Get a valid post id.
       beforeEach('randomize post to delete', async () => {
-        const posts = await postsInDb();
+        const posts = await ownerPostsInDb();
         postToDelete = faker.random.arrayElement(posts);
       });
 
@@ -551,21 +865,22 @@ describe('when there are some posts in the database', () => {
         });
 
         // Invalid body.
-        it('should return bad request for invalid body', async () => {
+        it('should return no content and delete a post for valid body', async () => {
           await deletePostAuth(postToDelete.id)
             .send({ invalid: 'invalid' })
-            .expect(badRequest.code)
-            .expect({ message: badRequest.message });
+            .expect(204);
 
-          // Make sure no post was deleted.
+          // Make sure post was deleted.
           const postsAtEnd = await postsInDb();
-          expect(postsAtEnd).to.have.length(postsAtStart.length);
+          expect(postsAtEnd).to.have.length(postsAtStart.length - 1);
+          expect(postsAtEnd.map(p => p.id)).to.not.contain(postToDelete.id);
         });
 
         // Unauthorized.
         it('should return forbidden if trying to modify post of other', async () => {
-          postToDelete = new Post(post(user('random')));
-          await postToDelete.save();
+          const tempPosts = await otherPostsInDb();
+          postToDelete = faker.random.arrayElement(tempPosts);
+
           await deletePostAuth(postToDelete.id)
             .expect(forbidden.code)
             .expect({ message: forbidden.message });
@@ -578,48 +893,331 @@ describe('when there are some posts in the database', () => {
     });
   });
 
+  /*********************
+   ** SEARCHING POSTS **
+   *********************/
+  describe.skip('[POST /api/posts/search] Searching posts', () => {
+    // Helper functions.
+    const search = () => api.post('/api/posts/search');
+    const searchAuth = () => withToken(search(), token);
+
+    /** @type {import('../types.js').Post} */
+    let referencePost = null;
+    /** @type {import('../types.js').Post[]} */
+    let postsAtStart = null;
+
+    beforeEach('fetch initial posts', async () => {
+      postsAtStart = await postsInDb();
+    });
+
+    beforeEach('get valid post', async () => {
+      referencePost = faker.random.arrayElement(postsAtStart);
+    });
+
+    // With authentication.
+    describe('without authentication', () => {
+      // Valid params.
+      describe('with valid params', () => {
+        // No params
+        it('should return empty array for no params', async () => {
+          await search().send().expect(200).expect([]);
+        });
+
+        // Based on country
+        it('should return posts by country', async () => {
+          await search()
+            .send({ country: referencePost.location.country })
+            .expect(200)
+            .expect(
+              postsAtStart.filter(
+                ({ location: { country } }) =>
+                  country === referencePost.location.country
+              )
+            );
+        });
+        // Based on city
+        it('should return posts by city', async () => {
+          await search()
+            .send({ city: referencePost.location.city })
+            .expect(200)
+            .expect(
+              postsAtStart.filter(
+                ({ location: { city } }) => city === referencePost.location.city
+              )
+            );
+        });
+        // Based on category
+        it('should return posts by category', async () => {
+          await search()
+            .send({ category: referencePost.category })
+            .expect(200)
+            .expect(
+              postsAtStart.filter(
+                post => post.category === referencePost.category
+              )
+            );
+        });
+
+        // Based on posted
+        it('should return posts by posted', async () => {
+          await search()
+            .send({ posted: referencePost.posted })
+            .expect(200)
+            .expect(
+              postsAtStart.filter(
+                ({ posted }) => posted === referencePost.posted
+              )
+            );
+        });
+
+        // Based on country and city
+        it('should return posts by country and city', async () => {
+          await search()
+            .send({
+              country: referencePost.location.country,
+              city: referencePost.location.city,
+            })
+            .expect(200)
+            .expect(
+              postsAtStart.filter(
+                ({ location: { country, city } }) =>
+                  country === referencePost.location.country &&
+                  city === referencePost.location.city
+              )
+            );
+        });
+
+        // Non existing city.
+        it('should return empty array for nonexisting city', async () => {
+          await search().send({ city: 'Random' }).expect(200).expect([]);
+        });
+      });
+
+      // Invalid param.s
+      describe('with invalid params', () => {
+        // Based on country
+        it('should return bad request for invalid country', async () => {
+          await search()
+            .send({ country: 3 })
+            .expect(badRequest.code)
+            .expect({ message: badRequest.message });
+        });
+        // Based on posted
+        it('should return bad request for invalid posted', async () => {
+          await search()
+            .send({ posted: Date.now().toString() })
+            .expect(badRequest.code)
+            .expect({ message: badRequest.message });
+        });
+        // Based on city
+        it('should return bad request for invalid city', async () => {
+          await search()
+            .send({ city: 3 })
+            .expect(badRequest.code)
+            .expect({ message: badRequest.message });
+        });
+        // Based on category
+        it('should return bad request for invalid category', async () => {
+          await search()
+            .send({ category: 3 })
+            .expect(badRequest.code)
+            .expect({ message: badRequest.message });
+        });
+      });
+    });
+
+    // With authentication.
+    describe('with authentication', () => {
+      // Valid params.
+      describe('with valid params', () => {
+        // No params
+        it('should return empty array for no params', async () => {
+          await searchAuth().send().expect(200).expect([]);
+        });
+
+        // Based on country
+        it('should return posts by country', async () => {
+          await searchAuth()
+            .send({ country: referencePost.location.country })
+            .expect(200)
+            .expect(
+              postsAtStart.filter(
+                ({ location: { country } }) =>
+                  country === referencePost.location.country
+              )
+            );
+        });
+        // Based on city
+        it('should return posts by city', async () => {
+          await searchAuth()
+            .send({ city: referencePost.location.city })
+            .expect(200)
+            .expect(
+              postsAtStart.filter(
+                ({ location: { city } }) => city === referencePost.location.city
+              )
+            );
+        });
+        // Based on category
+        it('should return posts by category', async () => {
+          await searchAuth()
+            .send({ category: referencePost.category })
+            .expect(200)
+            .expect(
+              postsAtStart.filter(
+                post => post.category === referencePost.category
+              )
+            );
+        });
+
+        // Based on posted
+        it('should return posts by posted', async () => {
+          await searchAuth()
+            .send({ posted: referencePost.posted })
+            .expect(200)
+            .expect(
+              postsAtStart.filter(
+                ({ posted }) => posted === referencePost.posted
+              )
+            );
+        });
+
+        // Based on country and city
+        it('should return posts by country and city', async () => {
+          await searchAuth()
+            .send({
+              country: referencePost.location.country,
+              city: referencePost.location.city,
+            })
+            .expect(200)
+            .expect(
+              postsAtStart.filter(
+                ({ location: { country, city } }) =>
+                  country === referencePost.location.country &&
+                  city === referencePost.location.city
+              )
+            );
+        });
+
+        // Non existing city.
+        it('should return empty array for nonexisting city', async () => {
+          await searchAuth().send({ city: 'Random' }).expect(200).expect([]);
+        });
+      });
+
+      // Invalid param.s
+      describe('with invalid params', () => {
+        // Based on country
+        it('should return bad request for invalid country', async () => {
+          await searchAuth()
+            .send({ country: 3 })
+            .expect(badRequest.code)
+            .expect({ message: badRequest.message });
+        });
+        // Based on posted
+        it('should return bad request for invalid posted', async () => {
+          await searchAuth()
+            .send({ posted: Date.now().toString() })
+            .expect(badRequest.code)
+            .expect({ message: badRequest.message });
+        });
+        // Based on city
+        it('should return bad request for invalid city', async () => {
+          await searchAuth()
+            .send({ city: 3 })
+            .expect(badRequest.code)
+            .expect({ message: badRequest.message });
+        });
+        // Based on category
+        it('should return bad request for invalid category', async () => {
+          await searchAuth()
+            .send({ category: 3 })
+            .expect(badRequest.code)
+            .expect({ message: badRequest.message });
+        });
+      });
+    });
+  });
+
   /*****************************
    ** UPLOADING POST IMAGE(S) **
    *****************************/
   describe('POST /api/posts/:id/upload', () => {
-    let post = null;
-    let upload = null;
-    let uploadWithToken = null;
-    //
-    beforeEach('Randomize post', async () => {
-      const posts = await postsInDb();
-      post = faker.random.arrayElement(posts);
-      upload = (id = post.id) => api.post(`/api/posts/${id}/upload`);
-      uploadWithToken = (id = post.id) => withToken(upload(id), token);
-    });
-    //
-    afterEach('Remove image folder', async () => {
-      //await fs.rm(IMAGES_PATH, { recursive: true, force: true });
+    let postsAtStart = null;
+    let postForUpload = null;
+    let filesAtStart = null;
+
+    const upload = postId => api.post(`/api/posts/${postId}/upload`);
+    const uploadAuth = postId => withToken(upload(postId), token);
+
+    beforeEach('fetch initial posts', async () => {
+      postsAtStart = await ownerPostsInDb();
     });
 
-    // Nonexisting post.
-    it('should not upload for post with invalid id', async () => {
-      await uploadWithToken(fakeId())
+    beforeEach('randomize post', async () => {
+      postForUpload = faker.random.arrayElement(postsAtStart);
+    });
+
+    beforeEach('create folder', async () => {
+      try {
+        await fs.mkdir(IMAGES_PATH);
+      } catch {}
+    });
+
+    beforeEach('get number of files', async () => {
+      filesAtStart = 0;
+    });
+
+    afterEach('delete files', async () => {
+      try {
+        await fs.rmdir(IMAGES_PATH, { recursive: true });
+      } catch {}
+    });
+
+    it('should return not found for invalid id as unauthenticated', async () => {
+      await upload(fakeId())
         .send()
         .expect(notFound.code)
         .expect({ message: notFound.message });
     });
 
-    // Removing images.
-    it('should remove the images when none is provided', async () => {
-      await uploadWithToken().send().expect(200).expect([]);
+    it('should require authentication', async () => {
+      await upload(postForUpload.id)
+        .send()
+        .expect(unauthorized.code)
+        .expect({ message: unauthorized.message });
+    });
+
+    it('should require authorization', async () => {
+      const tempPosts = await otherPostsInDb();
+      await uploadAuth(tempPosts[0].id)
+        .send()
+        .expect(forbidden.code)
+        .expect({ message: forbidden.message });
+    });
+
+    // Nonexisting post.
+    it('should not upload for post with invalid id', async () => {
+      await uploadAuth(fakeId())
+        .send()
+        .expect(notFound.code)
+        .expect({ message: notFound.message });
+
+      expect(await fs.readdir(IMAGES_PATH)).to.have.length(filesAtStart);
     });
 
     // Uploading one image.
     it('should upload attached image', async () => {
-      await uploadWithToken()
+      await uploadAuth(postForUpload.id)
         .attach('fileName', './app/tests/1.png')
         .expect(200);
+
+      expect(await fs.readdir(IMAGES_PATH)).to.have.length(filesAtStart + 1);
     });
 
     // Uploading multiple images.
     it('should upload attached images', async () => {
-      const res = await uploadWithToken()
+      const res = await uploadAuth(postForUpload.id)
         .attach('fileName', './app/tests/1.png')
         .attach('fileName', './app/tests/1.png')
         .attach('fileName', './app/tests/index.jpg')
@@ -627,11 +1225,13 @@ describe('when there are some posts in the database', () => {
         .expect(200);
       expect(res.body).to.have.lengthOf(4);
       expect(res.body[0]).to.be.a('string');
+
+      expect(await fs.readdir(IMAGES_PATH)).to.have.length(filesAtStart + 4);
     });
 
     // Uploading more than max num of images.
     it('should return a correct response type for invalid amount of images', async () => {
-      await uploadWithToken()
+      await uploadAuth(postForUpload.id)
         .attach('fileName', './app/tests/1.png')
         .attach('fileName', './app/tests/1.png')
         .attach('fileName', './app/tests/1.png')
@@ -639,26 +1239,32 @@ describe('when there are some posts in the database', () => {
         .attach('fileName', './app/tests/1.png')
         .expect(badRequest.code)
         .expect({ message: badRequest.message });
+
+      expect(await fs.readdir(IMAGES_PATH)).to.have.length(filesAtStart);
     });
 
     // Uploading files of
     it('should return a correct response type for invalid file type', async () => {
-      await uploadWithToken()
+      await uploadAuth(postForUpload.id)
         .attach('fileName', './app/tests/empty.txt')
         .expect(badRequest.code)
         .expect({ message: badRequest.message });
+
+      expect(await fs.readdir(IMAGES_PATH)).to.have.length(filesAtStart);
     });
 
-    /*
-    // Unauthenticated user.
-    it('should require authentication', async () => {
-      await api
-        .post(`/api/posts/${post.id}/upload`)
+    // Removing images.
+    it('should remove the images when none is provided', async () => {
+      await uploadAuth(postForUpload.id)
         .attach('fileName', './app/tests/1.png')
-        .expect(unauthorized.code)
-        .expect({ message: unauthorized.message });
+        .attach('fileName', './app/tests/1.png')
+        .attach('fileName', './app/tests/index.jpg')
+        .attach('fileName', './app/tests/1.png')
+        .expect(200);
+
+      await uploadAuth(postForUpload.id).send().expect(200).expect([]);
+      expect(await fs.readdir(IMAGES_PATH)).to.have.length(0);
     });
-    */
   });
 });
 
