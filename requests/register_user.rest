@@ -5,18 +5,17 @@ POST http://localhost:3000/api/users HTTP/1.1
 Content-Type: application/json
 
 {
-  "email": "asd123@test.com",
-  "username": "asd123",
+  "email": "jaakontestaus123@testaaja.com",
+  "username": "jaakontestaus",
   "address": {
     "city": "Oulu",
     "country": "Finland",
-    "postalCode": 90550,
-    "street": "Testaajantie 123",
-    "ree": 123
+    "postalCode": "90550",
+    "street": "Testaajantie 123"
   },
   "phoneNumber": "+358401231231",
   "birthDate": "1994-08-05",
-  "password": "testaaja"
+  "password": "jaakontestaus"
 }
 
 ### CREATE USER WITH INVALID BODY

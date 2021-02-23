@@ -8,6 +8,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { Router } from 'express';
 import { IMAGES_PATH } from '../utils/config.js';
+import { notFoundError } from '../utils/errors.js';
 
 const imagesRouter = Router();
 
@@ -20,9 +21,11 @@ imagesRouter.get('/', async (req, res) => {
 });
 
 // [GET] Returns an image resource with the specified name.
-imagesRouter.get('/:imageName', async (req, res) => {
+imagesRouter.get('/:imageName', (req, res, next) => {
   const imageName = req.params.imageName;
-  res.sendFile(path.join(IMAGES_PATH, imageName));
+  res.sendFile(path.join(IMAGES_PATH, imageName), { root: '.' }, () =>
+    next(notFoundError())
+  );
 });
 
 export default imagesRouter;

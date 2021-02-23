@@ -10,10 +10,10 @@
 
 1. Install dependencies with `npm install`
 2. Create a **.env** file in the root folder with the following variables:
-   ![Drag Racing](env_vars.png)
+   ![Env vars](env_vars.png)
 3. Run command `npm start` and pray that everything works.
 
 ### TO TEST
 
-1. Follow to run steps 1-2.
-2. Run command `npm run test`
+1. Follow _TO RUN_ steps 1-2.
+2. Run command `npm run test` or `npm run bailtest`

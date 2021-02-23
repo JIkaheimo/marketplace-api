@@ -54,7 +54,8 @@ const withCity = (query, city) => ({
 const withPosted = (query, date) => {
   const datePosted = moment(date, 'YYYY-MM-DD');
   // Make sure date was in valid forma.
-  if (!datePosted.isValid()) throw badRequestError();
+  if (!Number.isNaN(+date) || !datePosted.isValid())
+    throw badRequestError('Please provide posted in format YYYY-MM-DD.');
   return {
     ...query,
     posted: {

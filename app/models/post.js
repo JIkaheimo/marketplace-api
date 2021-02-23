@@ -127,7 +127,7 @@ postSchema.pre('findOneAndUpdate', function (next) {
 postSchema.set('toJSON', {
   transform: (_, post) => {
     post.id = post._id.toString();
-    post.posted = moment(post.posted).toISOString().split('T')[0];
+    post.posted = moment(post.posted).toISOString();
     delete post._id;
     delete post.__v;
   },

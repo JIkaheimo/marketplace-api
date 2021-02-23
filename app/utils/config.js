@@ -2,7 +2,7 @@
 
 /**
  * This module contains environment specific (development, testing...)
- * parameter configurations.
+ * configurations.
  * @module utils/config
  */
 

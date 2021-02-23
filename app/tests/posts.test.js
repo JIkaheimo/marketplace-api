@@ -3,7 +3,6 @@
 // Third-party modules.
 import mongoose from 'mongoose';
 import faker from 'faker';
-import path from 'path';
 import supertest from 'supertest';
 import { default as chai } from 'chai';
 const { expect } = chai;
@@ -11,7 +10,7 @@ import fs from 'fs/promises';
 
 // In-house modules.
 import app from '../server.js';
-import { getLocation, getSeller, Post, User } from '../models/index.js';
+import { getLocation, getSeller, Post } from '../models/index.js';
 
 import {
   withToken,
@@ -27,11 +26,9 @@ import {
   otherPostsInDb,
 } from './helpers.js';
 
-import { ERRORS } from '../constants.js';
+import { unauthorized, notFound, badRequest, forbidden } from '../constants.js';
 import { removeField } from './data.js';
 import { IMAGES_PATH } from '../utils/config.js';
-
-const { unauthorized, notFound, badRequest, forbidden } = ERRORS;
 
 const api = supertest(app);
 
@@ -210,7 +207,7 @@ describe('While handling post requests', () => {
             .send({ invalid: 'invalid' })
             .expect(badRequest.code)
             .expect({
-              message: badRequest.message.replace,
+              message: badRequest.message,
               detail:
                 'Offset must be less than 0, and limit between 0 and 100.',
             });
@@ -218,9 +215,10 @@ describe('While handling post requests', () => {
 
         // Valid body.
         it('should return bad request for valid body when limit type is invalid', async () => {
-          await getPosts('?limit=asdasd')
-            .expect(badRequest.code)
-            .expect({ message: badRequest.message });
+          await getPosts('?limit=asdasd').expect(badRequest.code).expect({
+            message: badRequest.message,
+            detail: 'Limit and offset must be numeric values.',
+          });
         });
 
         // Invalid body.
@@ -228,7 +226,10 @@ describe('While handling post requests', () => {
           await getPosts('?limit=asdasd')
             .send({ invalid: 'invalid' })
             .expect(badRequest.code)
-            .expect({ message: badRequest.message });
+            .expect({
+              message: badRequest.message,
+              detail: 'Limit and offset must be numeric values.',
+            });
         });
       });
     });
@@ -308,9 +309,10 @@ describe('While handling post requests', () => {
       describe('with invalid query parameters', () => {
         // Valid body.
         it('should return bad request for valid body when offset=-1', async () => {
-          await getPostsAuth('?offset=-1')
-            .expect(badRequest.code)
-            .expect({ message: badRequest.message });
+          await getPostsAuth('?offset=-1').expect(badRequest.code).expect({
+            message: badRequest.message,
+            detail: 'Offset must be less than 0, and limit between 0 and 100.',
+          });
         });
 
         // Invalid body.
@@ -318,14 +320,19 @@ describe('While handling post requests', () => {
           await getPostsAuth('?offset=-1')
             .send({ invalid: 'invalid' })
             .expect(badRequest.code)
-            .expect({ message: badRequest.message });
+            .expect({
+              message: badRequest.message,
+              detail:
+                'Offset must be less than 0, and limit between 0 and 100.',
+            });
         });
 
         // Valid body.
         it('should return bad request for valid body when limit=-1', async () => {
-          await getPostsAuth('?limit=-1')
-            .expect(badRequest.code)
-            .expect({ message: badRequest.message });
+          await getPostsAuth('?limit=-1').expect(badRequest.code).expect({
+            message: badRequest.message,
+            detail: 'Offset must be less than 0, and limit between 0 and 100.',
+          });
         });
 
         // Invalid body.
@@ -333,14 +340,19 @@ describe('While handling post requests', () => {
           await getPostsAuth('?limit=-1')
             .send({ invalid: 'invalid' })
             .expect(badRequest.code)
-            .expect({ message: badRequest.message });
+            .expect({
+              message: badRequest.message,
+              detail:
+                'Offset must be less than 0, and limit between 0 and 100.',
+            });
         });
 
         // Valid body.
         it('should return bad request for valid body when limit=101', async () => {
-          await getPostsAuth('?limit=101')
-            .expect(badRequest.code)
-            .expect({ message: badRequest.message });
+          await getPostsAuth('?limit=101').expect(badRequest.code).expect({
+            message: badRequest.message,
+            detail: 'Offset must be less than 0, and limit between 0 and 100.',
+          });
         });
 
         // Invalid body.
@@ -348,14 +360,19 @@ describe('While handling post requests', () => {
           await getPostsAuth('?limit=101')
             .send({ invalid: 'invalid' })
             .expect(badRequest.code)
-            .expect({ message: badRequest.message });
+            .expect({
+              message: badRequest.message,
+              detail:
+                'Offset must be less than 0, and limit between 0 and 100.',
+            });
         });
 
         // Valid body.
         it('should return bad request for valid body when limit type is invalid', async () => {
-          await getPostsAuth('?limit=asdasd')
-            .expect(badRequest.code)
-            .expect({ message: badRequest.message });
+          await getPostsAuth('?limit=asdasd').expect(badRequest.code).expect({
+            message: badRequest.message,
+            detail: 'Limit and offset must be numeric values.',
+          });
         });
 
         // Invalid body.
@@ -363,7 +380,29 @@ describe('While handling post requests', () => {
           await getPostsAuth('?limit=asdasd')
             .send({ invalid: 'invalid' })
             .expect(badRequest.code)
-            .expect({ message: badRequest.message });
+            .expect({
+              message: badRequest.message,
+              detail: 'Limit and offset must be numeric values.',
+            });
+        });
+
+        // Valid body.
+        it('should return bad request for valid body when offset type is invalid', async () => {
+          await getPostsAuth('?offset=asdasd').expect(badRequest.code).expect({
+            message: badRequest.message,
+            detail: 'Limit and offset must be numeric values.',
+          });
+        });
+
+        // Invalid body.
+        it('should return bad request for invalid body when offset type is invalid', async () => {
+          await getPostsAuth('?offset=asdasd')
+            .send({ invalid: 'invalid' })
+            .expect(badRequest.code)
+            .expect({
+              message: badRequest.message,
+              detail: 'Limit and offset must be numeric values.',
+            });
         });
       });
     });
@@ -418,7 +457,7 @@ describe('While handling post requests', () => {
     describe('with authentication', () => {
       // Valid body.
       it('should create a post and return 200 for valid body', async () => {
-        const res = await createPostAuth().send(postToCreate).expect(200);
+        const res = await createPostAuth().send(postToCreate).expect(201);
 
         // Make sure created post was returned.
         expect(res.body).to.deep.include({ ...postToCreate, seller, location });
@@ -439,7 +478,10 @@ describe('While handling post requests', () => {
         await createPostAuth()
           .send({ invalid: 'invalid', ...getNewPost() })
           .expect(badRequest.code)
-          .expect({ message: badRequest.message });
+          .expect({
+            message: badRequest.message,
+            detail: 'Extranous fields in body.',
+          });
 
         // Make sure no post was created.
         const postsAtEnd = await postsInDb();
@@ -450,8 +492,7 @@ describe('While handling post requests', () => {
       it('should return bad request for invalid body', async () => {
         await createPostAuth()
           .send({ ...removeField(getNewPost()) })
-          .expect(badRequest.code)
-          .expect({ message: badRequest.message });
+          .expect(badRequest.code);
 
         // Make sure no post was created.
         const postsAtEnd = await postsInDb();
@@ -462,10 +503,7 @@ describe('While handling post requests', () => {
       describe('with invalid fields', () => {
         // Helper function.
         const testInvalidPost = async body => {
-          await createPostAuth()
-            .send(body)
-            .expect(badRequest.code)
-            .expect({ message: badRequest.message });
+          await createPostAuth().send(body).expect(badRequest.code);
           const postsAtEnd = await postsInDb();
           expect(postsAtEnd).to.have.length(postsAtStart.length);
         };
@@ -730,7 +768,10 @@ describe('While handling post requests', () => {
           await modifyPostAuth(postToModify.id)
             .send({ invalid: 'invalid', ...getNewPost() })
             .expect(badRequest.code)
-            .expect({ message: badRequest.message });
+            .expect({
+              message: badRequest.message,
+              detail: 'Extranous fields in body.',
+            });
 
           // Make sure no post was modified.
           const postAfter = await Post.findById(postToModify.id);
@@ -741,8 +782,7 @@ describe('While handling post requests', () => {
         it('should return bad request for invalid body', async () => {
           await modifyPostAuth(postToModify.id)
             .send({ ...removeField(getNewPost()) })
-            .expect(badRequest.code)
-            .expect({ message: badRequest.message });
+            .expect(badRequest.code);
 
           // Make sure no post was modified.
           const postAfter = await Post.findById(postToModify.id);
@@ -916,9 +956,7 @@ describe('While handling post requests', () => {
     const search = () => api.post('/api/posts/search');
     const searchAuth = () => withToken(search(), token);
 
-    /** @type {import('../types.js').Post} */
     let referencePost = null;
-    /** @type {import('../types.js').Post[]} */
     let postsAtStart = null;
 
     beforeEach('fetch initial posts', async () => {
@@ -973,18 +1011,6 @@ describe('While handling post requests', () => {
             );
         });
 
-        // Based on posted
-        it('should return posts by posted', async () => {
-          await search()
-            .send({ posted: referencePost.posted })
-            .expect(200)
-            .expect(
-              postsAtStart.filter(
-                ({ posted }) => posted === referencePost.posted
-              )
-            );
-        });
-
         // Based on country and city
         it('should return posts by country and city', async () => {
           await search()
@@ -1022,7 +1048,10 @@ describe('While handling post requests', () => {
           await search()
             .send({ posted: Date.now().toString() })
             .expect(badRequest.code)
-            .expect({ message: badRequest.message });
+            .expect({
+              message: badRequest.message,
+              detail: 'Please provide posted in format YYYY-MM-DD.',
+            });
         });
         // Based on city
         it('should return bad request for invalid city', async () => {
@@ -1134,7 +1163,10 @@ describe('While handling post requests', () => {
           await searchAuth()
             .send({ posted: Date.now().toString() })
             .expect(badRequest.code)
-            .expect({ message: badRequest.message });
+            .expect({
+              message: badRequest.message,
+              detail: 'Please provide posted in format YYYY-MM-DD.',
+            });
         });
         // Based on city
         it('should return bad request for invalid city', async () => {
@@ -1249,7 +1281,7 @@ describe('While handling post requests', () => {
         .attach('fileName', './app/tests/1.png')
         .attach('fileName', './app/tests/1.png')
         .expect(badRequest.code)
-        .expect({ message: badRequest.message });
+        .expect({ message: badRequest.message, detail: 'Unexpected field' });
 
       expect(await fs.readdir(IMAGES_PATH)).to.have.length(0);
     });
@@ -1259,7 +1291,10 @@ describe('While handling post requests', () => {
       await uploadAuth(postForUpload.id)
         .attach('fileName', './app/tests/empty.txt')
         .expect(badRequest.code)
-        .expect({ message: badRequest.message });
+        .expect({
+          message: badRequest.message,
+          detail: 'Make sure all the files are images.',
+        });
 
       expect(await fs.readdir(IMAGES_PATH)).to.have.length(0);
     });
@@ -1273,7 +1308,25 @@ describe('While handling post requests', () => {
         .attach('fileName', './app/tests/1.png')
         .expect(200);
 
+      expect(await fs.readdir(IMAGES_PATH)).to.have.length(4);
+
       await uploadAuth(postForUpload.id).send().expect(200).expect([]);
+      expect(await fs.readdir(IMAGES_PATH)).to.have.length(0);
+    });
+
+    it('should remove the images when deleting a post', async () => {
+      await uploadAuth(postForUpload.id)
+        .attach('fileName', './app/tests/1.png')
+        .attach('fileName', './app/tests/1.png')
+        .attach('fileName', './app/tests/index.jpg')
+        .attach('fileName', './app/tests/1.png')
+        .expect(200);
+
+      expect(await fs.readdir(IMAGES_PATH)).to.have.length(4);
+
+      await withToken(api.delete(`/api/posts/${postForUpload.id}`), token)
+        .send()
+        .expect(204);
       expect(await fs.readdir(IMAGES_PATH)).to.have.length(0);
     });
   });

@@ -1,6 +1,13 @@
 //@ts-check
 
-import { ERRORS } from '../constants.js';
+/**
+ * This module contains some general-purpose
+ * functions to create errors.
+ *
+ * @module utils/errors
+ */
+
+import { badRequest, unauthorized, forbidden, notFound } from '../constants.js';
 
 /** @typedef {(string?) => import('../types.js').ResponseError} ErrorCreator   */
 
@@ -18,20 +25,13 @@ const errorCreator = errorType => (message = errorType.message) => {
 };
 
 /** @type {ErrorCreator} */
-export const badRequestError = errorCreator(ERRORS.badRequest);
+export const badRequestError = errorCreator(badRequest);
 
 /** @type {ErrorCreator} */
-export const unauthorizedError = errorCreator(ERRORS.unauthorized);
+export const unauthorizedError = errorCreator(unauthorized);
 
 /** @type {ErrorCreator} */
-export const forbiddenError = errorCreator(ERRORS.forbidden);
+export const forbiddenError = errorCreator(forbidden);
 
 /** @type {ErrorCreator} */
-export const notFoundError = errorCreator(ERRORS.notFound);
-
-export default {
-  badRequestError,
-  unauthorizedError,
-  forbiddenError,
-  notFoundError,
-};
+export const notFoundError = errorCreator(notFound);

@@ -14,7 +14,7 @@ import path from 'path';
 
 // In-house modules.
 import { Post, User } from '../models/index.js';
-import { auth } from '../utils/index.js';
+import { auth, logger } from '../utils/index.js';
 import {
   badRequestError,
   forbiddenError,
@@ -42,7 +42,7 @@ const multerUpload = multer({
 /**
  * Posts router.
  */
-export const postsRouter = Router();
+const postsRouter = Router();
 
 /**
  * Simple middleware to check if the fetched
@@ -109,7 +109,7 @@ postsRouter.post(
     // Create a new post.
     const createdPost = await createPost(user, postInfo);
     // Return th created post.
-    res.json(createdPost);
+    res.status(201).json(createdPost);
   }
 );
 
@@ -148,10 +148,14 @@ postsRouter.post(
     // Remove all files and throw error if unsupported files were provided.
     if (invalidUpload) {
       await Promise.all(files.map(file => fs.rm(file.path)));
-      next(badRequestError());
+      next(badRequestError('Make sure all the files are images.'));
     }
     // Remove old images.
-    await deletePostImages(post);
+    try {
+      await deletePostImages(post);
+    } catch {
+      logger.i('No files were found');
+    }
 
     // Add image extension to image names.
     const imageNames = files.map(

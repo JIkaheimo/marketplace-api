@@ -10,6 +10,12 @@ import cors from 'cors';
 // In-house modules.
 import { mware, db } from './utils/index.js';
 import * as routes from './controllers/index.js';
+import {
+  IMAGES_PATH,
+  LOGIN_PATH,
+  POSTS_PATH,
+  USERS_PATH,
+} from './constants.js';
 
 const app = express();
 
@@ -32,10 +38,10 @@ app.use(mware.pathProvider);
 process.env.NODE_ENV !== 'test' ? app.use(morgan('tiny')) : null;
 
 // Add diggerent API routes.
-app.use('/api/posts', routes.posts);
-app.use('/api/login', routes.login);
-app.use('/api/users', routes.users);
-app.use('/api/images', routes.images);
+app.use(POSTS_PATH, routes.posts);
+app.use(LOGIN_PATH, routes.login);
+app.use(USERS_PATH, routes.users);
+app.use(IMAGES_PATH, routes.images);
 
 // Attach post-route middlewares.
 app.use(mware.unknownHandler);

@@ -1,5 +1,3 @@
-//@ts-check
-
 /**
  * This module contains some authentication/authorization
  * related helper functions and middleware.
@@ -41,15 +39,16 @@ export const getToken = req => {
  * @param {import('express').Response} _ The response.
  * @param {import('express').NextFunction} next
  */
-export const checkToken = async (req, _, next) => {
+export const checkToken = (req, _, next) => {
   const token = getToken(req);
   // Verify token.
   const decodedToken = jwt.verify(token, process.env.SECRET);
   const { username, id } = decodedToken;
 
   // Add parsed token data to request.
-  req['username'] = username;
-  req['userId'] = id;
+  req.username = username;
+  req.userId = id;
+
   // Call next middleware.
   next();
 };
@@ -61,6 +60,8 @@ export const authenticate = checkToken;
 
 /**
  * Middleware to hash the user password from the given request.
+ *
+ * @middleware
  * @param {import('express').Request} req The request.
  * @param {import('express').Response} _ The response.
  * @param {import('express').NextFunction} next

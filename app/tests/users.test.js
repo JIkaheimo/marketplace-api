@@ -6,25 +6,31 @@ import { default as chai } from 'chai';
 const { expect } = chai;
 
 import app from '../server.js';
-import { usersInDb, otherUsers, getNewUser, createUsers } from './helpers.js';
-import { ERRORS } from '../constants.js';
+import {
+  usersInDb,
+  otherUsers,
+  getNewUser,
+  createUsers,
+  getToken,
+  owner,
+} from './helpers.js';
+import { badRequest, unauthorized } from '../constants.js';
 import { login, removeField } from './data.js';
 import { User } from '../models/user.js';
-const { badRequest, unauthorized } = ERRORS;
 
 const api = supertest(app);
 
-const loginReq = (body, { message = null, code }) => {
-  const req = api.post('/api/login').send(body).expect(code);
-  if (message) req.expect({ message });
-  return req;
-};
-
-beforeEach(async () => {
-  await createUsers(otherUsers);
-});
-
 describe('While handling user requests', () => {
+  let usersAtStart = null;
+
+  beforeEach('Create users', async () => {
+    await createUsers([owner, ...otherUsers]);
+  });
+
+  beforeEach('Get created users', async () => {
+    usersAtStart = await usersInDb();
+  });
+
   /*************************
    ** CREATING A NEW USER **
    *************************/
@@ -32,62 +38,69 @@ describe('While handling user requests', () => {
     // Valid data.
     describe('with valid data', () => {
       it('should create a new user', async () => {
-        // Get the users in the beginning.
-        const usersAtStart = await usersInDb();
         // Create a new random user.
         const newUser = getNewUser();
+        const { password, ...userProps } = newUser;
         // Create the user.
-        const req = await api
-          .post('/api/users')
-          .send(newUser)
-          .expect(200)
-          .expect('Content-Type', /application\/json/);
-
-        it('should return a body with the sent user info.', () => {
-          expect(req.body.user).to.include(newUser);
-        });
+        const req = await api.post('/api/users').send(newUser).expect(200);
+        // Make sure everything was returned.
+        expect(req.body.user).to.deep.include(userProps);
+        expect(req.body.token).to.be.a('string');
 
         // Get the modified users.
         const usersAtEnd = await usersInDb();
         // Check if the amount of users was increased.
         expect(usersAtEnd).to.have.length(usersAtStart.length + 1);
-        // Check if the users
+        // Check if the users have the new user.
         const usernames = usersAtEnd.map(u => u.username);
         expect(usernames).to.contain(newUser.username);
       });
     });
-    /*
-     * FOR INVALID DATA
-     */
+
+    // With invalid data.
     describe('with invalid data', () => {
-      //
+      // Username in use.
       it('should not create a new user if username is already in use.', async () => {
+        // Increments users by one.
         const newUser = getNewUser();
         await api.post('/api/users').send(newUser);
-        const usersAtStart = await usersInDb();
 
         await api
           .post('/api/users')
           .send({ ...newUser, email: 'testaaja@gmail.com' })
           .expect(409)
-          .expect('Content-Type', /application\/json/)
-          .expect({ message: 'username already in use' });
+          .expect({ message: 'Conflict', detail: 'username already in use.' });
 
         const usersAtEnd = await usersInDb();
-        expect(usersAtEnd).to.have.length(usersAtStart.length);
+        expect(usersAtEnd).to.have.length(usersAtStart.length + 1);
       });
 
+      // Email in use.
       it('should not create a new user if email is already in use.', async () => {
         const newUser = getNewUser();
+
+        // Increments users by one.
         await api.post('/api/users').send(newUser);
-        const usersAtStart = await usersInDb();
 
         await api
           .post('/api/users')
           .send({ ...newUser, username: 'Testaaja123' })
           .expect(409)
-          .expect('Content-Type', /application\/json/)
-          .expect({ message: 'email already in use' });
+          .expect({ message: 'Conflict', detail: 'email already in use.' });
+
+        const usersAtEnd = await usersInDb();
+        expect(usersAtEnd).to.have.length(usersAtStart.length + 1);
+      });
+
+      // Invalid data format.
+      it('should not work for missing data', async () => {
+        // Increments users by one.
+        const newUser = getNewUser();
+
+        await api
+          .post('/api/users')
+          .send({ ...removeField(newUser) })
+          .expect(400);
 
         const usersAtEnd = await usersInDb();
         expect(usersAtEnd).to.have.length(usersAtStart.length);
@@ -102,6 +115,11 @@ describe('While handling user requests', () => {
     let user = otherUsers[0];
     let validCredentials = login();
     let userCredentials = { username: user.username, password: user.password };
+
+    const loginReq = (body, { code }) => {
+      const req = api.post('/api/login').send(body).expect(code);
+      return req;
+    };
 
     // Invalid request body.
     it('should return 400 for invalid request body', async () => {
@@ -122,7 +140,9 @@ describe('While handling user requests', () => {
     it('should return bearer token for valid login credentials', async () => {
       const { body } = await loginReq(userCredentials, { code: 200 });
       expect(body).to.have.property('token');
+      expect(body.token).to.be.a('string');
       expect(body).to.have.property('user');
+
       const user = await User.findById(body.user.id);
       expect(body.user).to.eql(user.toJSON());
     });

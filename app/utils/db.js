@@ -1,5 +1,12 @@
 //@ts-check
 
+/**
+ * This module contains functions
+ * to manage the connection with the MongoDB.
+ *
+ * @module utils/db
+ */
+
 import mongoose from 'mongoose';
 
 import { logger, config } from './index.js';
@@ -17,7 +24,7 @@ export const connect = callback => {
       logger.i('Connected to MongoDB!');
       callback();
     })
-    .catch(err => logger.e('Could not connect to MongoDB...'));
+    .catch(_ => logger.e('Could not connect to MongoDB...'));
 };
 
 export default {

@@ -1,26 +1,26 @@
-POST http://localhost:3000/api/posts/601bbdac90a0dd3538d6ac49/upload
+POST http://localhost:3000/api/posts/6035249a11aa9c4990494cec/upload
 Content-Type: multipart/form-data; boundary=----WebKitFormBoundary7MA4YWxkTrZu0gW
-Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6IlRlc3RhYWphMTIzIiwiaWQiOiI2MDExYWYwMTYwOTA4MDFmMDhjMGY3N2UiLCJpYXQiOjE2MTE4MTY4ODF9.iUM0QFqdcsOoIVc-kuixRqbDFxRJwUx5-c6462TVf0Y
+Authorization: bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6ImphYWtvbnRlc3RhdXMiLCJpZCI6IjYwMzUyNDI2MTFhYTljNDk5MDQ5NGNlYiIsImlhdCI6MTYxNDA5NjMyOX0.rRDtgK1wPOJK1Veunj2_OfuVe6ULJSm_KA4onzLeHrU
 
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="fileName"; filename="1.png"
+Content-Disposition: form-data; name="fileName"; filename="../app/tests/1.png"
 Content-Type: image/png
 
-< ../1.png
+< ../app/tests/1.png
 
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="fileName"; filename="1.png"
+Content-Disposition: form-data; name="fileName"; filename=".../app/tests/1.png"
 Content-Type: image/png
 
-< ../1.png
+< ../app/tests/1.png
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="fileName"; filename="1.png"
+Content-Disposition: form-data; name="fileName"; filename="../app/tests/1.png"
 Content-Type: image/png
 
-< ../1.png
+< ../app/tests/1.png
 ------WebKitFormBoundary7MA4YWxkTrZu0gW
-Content-Disposition: form-data; name="fileName"; filename="1.png"
+Content-Disposition: form-data; name="fileName"; filename="../app/tests/1.png"
 Content-Type: image/png
 
-< ../1.png
+< ../app/tests/1.png
 ------WebKitFormBoundary7MA4YWxkTrZu0gW--
