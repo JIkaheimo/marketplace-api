@@ -14,7 +14,7 @@ describe('when requesting non-existing path', () => {
 
   it('should return a response type of 404 (Not Found) with correct message.', async () => {
     await api
-      .get('/api/')
+      .get('/api/asdasd')
       .send()
       .expect(notFound.code)
       .expect({ message: notFound.message });

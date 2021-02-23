@@ -22,9 +22,11 @@ imagesRouter.get('/', async (req, res) => {
 
 // [GET] Returns an image resource with the specified name.
 imagesRouter.get('/:imageName', ({ params: { imageName } }, res, next) => {
-  res.sendFile(path.join(IMAGES_PATH, imageName), { root: '.' }, () =>
-    next(notFoundError())
-  );
+  res
+    .status(200)
+    .sendFile(path.join(IMAGES_PATH, imageName), { root: '.' }, error => {
+      if (error) next(notFoundError());
+    });
 });
 
 export default imagesRouter;
