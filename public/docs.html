@@ -6774,7 +6774,7 @@ Without providing any images, the already stored images will be deleted.
 *This like every identifier based resource path might return 404 for invalid id type aswell*</p>
                         <p></p>
                         <br />
-                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/posts/{id}upload</span></code></pre>
+                        <pre class="prettyprint language-html prettyprinted" data-type="post"><code><span class="pln">/posts/{id}/upload</span></code></pre>
                         <p>
                           <h3>Usage and SDK Samples</h3>
                         </p>
@@ -6798,7 +6798,7 @@ Without providing any images, the already stored images will be deleted.
  -H "Authorization: Bearer [[accessToken]]"\
 -H "Accept: application/json"\
 -H "Content-Type: multipart/form-data"\
-"http://localhost:3000/api/posts/{id}upload"</code></pre>
+"http://localhost:3000/api/posts/{id}/upload"</code></pre>
                           </div>
                           <div class="tab-pane" id="examples-Default-uploadPostImages-0-java">
                             <pre class="prettyprint"><code class="language-java">import io.swagger.client.*;
